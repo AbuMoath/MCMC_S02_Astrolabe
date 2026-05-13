@@ -1,0 +1,290 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Inquiry;
+use App\Models\Agency;
+use App\Models\AgencyNote;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
+class AgencyReviewAndNotificationController extends Controller
+{
+    /**
+     * Show the public user's inquiries and their assigned agencies.
+     */
+    public function viewAssignedAgencies(Request $request)
+    {
+        $userId = auth()->id(); // Adjust if you use a different auth system
+        $inquiries = Inquiry::with('agency')
+            ->where('UserID', $userId)
+            ->orderByDesc('InquirySendDate')
+            ->get();
+
+        return view('Module3.PublicUser.ViewAssignedAgency', compact('inquiries'));
+    }
+
+    /**
+     * Show view and display inquiry page for agencies
+     */
+    public function showViewAndDisplayInquiry()
+    {
+        if (!session('agency_id')) {
+            return redirect()->route('login');
+        }
+
+        $agency = Agency::find(session('agency_id'));
+        if (!$agency) {
+            return redirect()->route('login');
+        }
+
+        // Get inquiries assigned to this agency with relationships
+        $inquiries = Inquiry::with(['user', 'agency', 'admin'])
+            ->where('AgencyID', $agency->AgencyID)
+            ->orderByRaw("
+                CASE
+                    WHEN COALESCE(InquiryPriority, 'Normal') = 'High' THEN 1
+                    WHEN COALESCE(InquiryPriority, 'Normal') = 'Medium' THEN 2
+                    WHEN COALESCE(InquiryPriority, 'Normal') = 'Low' THEN 3
+                    ELSE 4
+                END
+            ")
+            ->orderByDesc('InquirySendDate')
+            ->get();
+
+        // Calculate status counts
+        $statusCounts = [
+            'total' => $inquiries->count(),
+            'pending' => $inquiries->where('InquiryStatus', 'Pending')->count(),
+            'approved' => $inquiries->where('InquiryStatus', 'Approved')->count(),
+            'rejected' => $inquiries->where('InquiryStatus', 'Rejected')->count(),
+        ];
+
+        return view('Module3.Agency.ViewAndDisplayInquiry', compact('agency', 'statusCounts', 'inquiries'));
+    }
+
+    /**
+     * Show inquiry details (AJAX compatible)
+     */
+    public function showInquiryDetails($id)
+    {
+        if (!session('agency_id')) {
+            return redirect()->route('login');
+        }
+
+        $agency = Agency::find(session('agency_id'));
+        if (!$agency) {
+            return redirect()->route('login');
+        }
+
+        // Get inquiry with relationships, ensuring it belongs to this agency
+        $inquiry = Inquiry::with(['user', 'agency', 'admin'])
+            ->where('InquiryID', $id)
+            ->where('AgencyID', $agency->AgencyID)
+            ->first();
+
+        if (!$inquiry) {
+            return redirect()->route('agency.view.display.inquiry')
+                ->with('error', 'Inquiry not found or not assigned to your agency.');
+        }
+
+        // Handle AJAX requests
+        if (request()->ajax() || request()->expectsJson()) {
+            return response()->json([
+                'inquiry' => $inquiry,
+                'agency' => $agency
+            ]);
+        }
+
+        return view('Module3.Agency.ViewAndDisplayInquiry', compact('inquiry', 'agency'));
+    }
+
+    /**
+     * Reject an inquiry
+     */
+    public function rejectInquiry(Request $request, $id)
+    {
+        if (!session('agency_id')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $agency = Agency::find(session('agency_id'));
+        if (!$agency) {
+            return response()->json(['success' => false, 'message' => 'Agency not found'], 404);
+        }
+
+        // Find inquiry belonging to this agency
+        $inquiry = Inquiry::where('InquiryID', $id)
+            ->where('AgencyID', $agency->AgencyID)
+            ->first();
+
+        if (!$inquiry) {
+            return response()->json(['success' => false, 'message' => 'Inquiry not found'], 404);
+        }
+
+        // Validate input
+        $request->validate([
+            'reason' => 'required|string|max:500',
+            'comments' => 'required|string|max:1000',
+        ]);
+
+        try {
+            // Update inquiry status to 'Rejected'
+            $inquiry->InquiryStatus = 'Rejected';
+            $inquiry->StatusComments = $request->reason . ' - ' . $request->comments;
+            $inquiry->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Inquiry rejected successfully!',
+                'inquiry' => $inquiry
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error rejecting inquiry: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update inquiry status
+     */
+    public function updateInquiryStatus(Request $request, $id)
+    {
+        if (!session('agency_id')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $agency = Agency::find(session('agency_id'));
+        if (!$agency) {
+            return response()->json(['success' => false, 'message' => 'Agency not found'], 404);
+        }
+
+        // Find inquiry belonging to this agency
+        $inquiry = Inquiry::where('InquiryID', $id)
+            ->where('AgencyID', $agency->AgencyID)
+            ->first();
+
+        if (!$inquiry) {
+            return response()->json(['success' => false, 'message' => 'Inquiry not found'], 404);
+        }
+
+        // Validate input
+        $request->validate([
+            'status' => 'required|string|in:Pending,Verified as True,Identified as Fake,Rejected',
+        ]);
+
+        try {
+            // Update inquiry status
+            $inquiry->InquiryStatus = $request->status;
+            $inquiry->save();
+
+            // TODO: Create notifications for user and admin here
+            // This can be implemented later with a proper notification system
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Inquiry status updated successfully!',
+                'inquiry' => $inquiry,
+                'status' => $request->status
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating inquiry status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Add notes to an inquiry
+     */
+    public function addInquiryNotes(Request $request, $id)
+    {
+        if (!session('agency_id')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $agency = Agency::find(session('agency_id'));
+        if (!$agency) {
+            return response()->json(['success' => false, 'message' => 'Agency not found'], 404);
+        }
+
+        // Find inquiry belonging to this agency
+        $inquiry = Inquiry::where('InquiryID', $id)
+            ->where('AgencyID', $agency->AgencyID)
+            ->first();
+
+        if (!$inquiry) {
+            return response()->json(['success' => false, 'message' => 'Inquiry not found'], 404);
+        }
+
+        // Validate input
+        $request->validate([
+            'recipient_type' => 'required|string|in:User,Administrator',
+            'comment' => 'required|string|max:1000',
+            'agency_name' => 'required|string',
+            'supporting_document' => 'nullable|file|mimes:png,pdf,xls,xlsx|max:10240', // 10MB max
+        ]);
+
+        try {
+            $supportingDocumentPath = null;
+            
+            // Handle file upload if provided
+            if ($request->hasFile('supporting_document')) {
+                $file = $request->file('supporting_document');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $supportingDocumentPath = $file->storeAs('inquiry_notes', $filename, 'public');
+            }
+
+            // Determine the user_id if the note is for a User
+            $userId = null;
+            if ($request->recipient_type === 'User') {
+                $userId = $inquiry->UserID;
+            }
+
+            Log::info('Creating agency note', [
+                'inquiry_id' => $id,
+                'agency_id' => $agency->AgencyID,
+                'recipient_type' => $request->recipient_type,
+                'user_id' => $userId,
+                'comment_length' => strlen($request->comment)
+            ]);
+
+            // Create the agency note
+            $agencyNote = AgencyNote::create([
+                'inquiry_id' => $id,
+                'agency_id' => $agency->AgencyID,
+                'agency_name' => $request->agency_name,
+                'recipient_type' => $request->recipient_type,
+                'comment' => $request->comment,
+                'supporting_document' => $supportingDocumentPath,
+                'user_id' => $userId
+            ]);
+
+            Log::info('Agency note created successfully', [
+                'note_id' => $agencyNote->id,
+                'for_user_id' => $userId
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notes added successfully!',
+                'note_id' => $agencyNote->id
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error creating agency note', [
+                'error' => $e->getMessage(),
+                'inquiry_id' => $id,
+                'agency_id' => $agency->AgencyID ?? null
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error adding notes: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+}
