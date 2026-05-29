@@ -1,1 +1,0 @@
-<?php /**PATH C:\xampp\htdocs\mcmc\myApp\resources\views/Module1/admin/viewUserDetailsPage.blade.php ENDPATH**/ ?>

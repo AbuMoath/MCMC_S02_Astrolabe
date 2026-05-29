@@ -38,6 +38,11 @@ Route::post('login', [Module3UserController::class, 'login']);
 // Logout
 Route::post('logout', [Module3UserController::class, 'logout'])->name('logout');
 
+// Admin 2FA OTP Routes
+Route::get('/admin/otp-verify', [Module3AdminController::class, 'showOtpForm'])->name('admin.otp.show');
+Route::post('/admin/otp-verify', [Module3AdminController::class, 'verifyOTP'])->name('admin.otp.verify');
+Route::post('/admin/otp-resend', [Module3AdminController::class, 'resendOTP'])->name('admin.otp.resend');
+
 // Password recovery routes
 Route::get('/password/recovery', [Module3UserController::class, 'showRecoveryForm'])->name('password.recovery');
 Route::post('/password/email', [Module3UserController::class, 'sendResetLink'])->name('password.email');
@@ -58,11 +63,7 @@ Route::get('/public-user-home', function () {
     if (!Auth::check()) {
         return redirect()->route('login');
     }
-<<<<<<< HEAD
-    return view('shared publicUser page.publicUserHome');
-=======
     return view('Module3.PublicUser.publicUserHome');
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41
 })->name('public.user.home');
 
 Route::put('/profile/update', [Module3UserController::class, 'updateProfile'])->name('profile.update');
@@ -85,11 +86,7 @@ Route::get('/profile/manage', function () {
 })->name('profile.manage');
 // Submit Inquiry page
 Route::get('/submit-inquiry', function () {
-<<<<<<< HEAD
-    return view('shared publicUser page.submitInquiryForm');
-=======
     return view('Module3.PublicUser.submitInquiryForm');
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41
 })->middleware('auth')->name('submit.inquiry');
 
 Route::post('/inquiries', [Module3InquiryController::class, 'store'])
@@ -241,13 +238,13 @@ Route::prefix('admin')->middleware('admin.auth')->group(function () {
 // Agency Communication Routes (API-style for AJAX calls)
 Route::prefix('agency')->middleware(['auth'])->group(function () {
     // Agency updates inquiry status and notifies public user
-    Route::post('/inquiry/update-status', [NotificationController::class, 'sendStatusUpdateToPublic'])->name('agency.inquiry.update.status');
+    Route::post('/inquiry/update-status', [NotificationController::class, 'sendStatusUpdateToPublic'])->name('agency.inquiry.notify.status');
     
     // Agency notifies admin of inquiry completion
     Route::post('/inquiry/notify-completed', [NotificationController::class, 'notifyInquiryCompleted'])->name('agency.inquiry.notify.completed');
     
     // Agency requests reassignment
-    Route::post('/inquiry/request-reassignment', [NotificationController::class, 'requestReassignment'])->name('agency.inquiry.request.reassignment');
+    Route::post('/inquiry/request-reassignment', [NotificationController::class, 'requestReassignment'])->name('agency.inquiry.notify.reassignment');
     
     // Agency requests clarification from admin
     Route::post('/inquiry/request-clarification', [NotificationController::class, 'requestClarification'])->name('agency.inquiry.request.clarification');

@@ -14,16 +14,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request as RequestFacade;
 use Illuminate\Validation\ValidationException;
-<<<<<<< HEAD:myApp/app/Http/Controllers/InquiryController.php
-use App\Models\Inquiry;
-use App\Models\AgencyNote;
-
-/**
- * @phpstan-ignore-file
- */
-=======
 use App\Models\Module3\Inquiry;
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41:myApp/app/Http/Controllers/Module3/PublicUser/InquiryController.php
 
 class InquiryController extends Controller
 {
@@ -159,20 +150,7 @@ class InquiryController extends Controller
                 ->get();
         }
 
-<<<<<<< HEAD:myApp/app/Http/Controllers/InquiryController.php
-        // Get all possible inquiry statuses for the filter dropdown
-        $statuses = [
-            'Pending' => 'Pending - Awaiting Review',
-            'Under Investigation' => 'Under Investigation - Agency Reviewing',
-            'Verified as True' => 'Verified as True - Genuine News',
-            'Identified as Fake' => 'Identified as Fake - False Information',
-            'Rejected' => 'Rejected - No Jurisdiction'
-        ];
-
-        return view('shared publicUser page.inquiries', compact('userInquiries', 'otherInquiries', 'statuses'));
-=======
         return view('publicUser.inquiries', compact('userInquiries', 'otherInquiries'));
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41:myApp/app/Http/Controllers/Module3/PublicUser/InquiryController.php
     }
 
     /**
@@ -198,9 +176,6 @@ class InquiryController extends Controller
                     ->orWhereNull('UserID');
             })->findOrFail($id);
 
-<<<<<<< HEAD:myApp/app/Http/Controllers/InquiryController.php
-        return view('shared publicUser page.inquiryDetails', compact('inquiry'));
-=======
         return view('Module3.PublicUser.inquiryDetails', compact('inquiry'));
     }
 
@@ -220,7 +195,6 @@ class InquiryController extends Controller
             ->get();
 
         return view('Module3.PublicUser.ViewAssignedAgency', compact('inquiries'));
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41:myApp/app/Http/Controllers/Module3/PublicUser/InquiryController.php
     }
 
     public function notifications()

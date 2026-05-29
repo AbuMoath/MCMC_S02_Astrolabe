@@ -35,6 +35,8 @@ class Administrator extends Model implements Authenticatable
         'AdminRole',
         'AdminAddress',
         'AdminProfilePicture',
+        'otp_code',
+        'otp_expires_at',
     ];
 
     /**
