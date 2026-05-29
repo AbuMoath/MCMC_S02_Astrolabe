@@ -1,0 +1,2 @@
+<?php echo $__env->make('home.recovaryPasswordPage', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php /**PATH C:\Users\khale\Desktop\MCMC_S02_Astrolabe\myApp\resources\views/auth/recovery.blade.php ENDPATH**/ ?>

@@ -45,11 +45,7 @@ class AdminController extends BaseController
             ->limit(5)
             ->get();
 
-<<<<<<< HEAD
-        return view('shared admin page.adminHome', compact('admin', 'stats', 'recentActivities'));
-=======
         return view('Module3.Admin.adminHome', compact('admin', 'stats', 'recentActivities'));
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41
     }
 
     /**
@@ -221,11 +217,7 @@ class AdminController extends BaseController
             ->orderBy('InquirySendDate', 'desc')
             ->get();
 
-<<<<<<< HEAD
-        return view('shared admin page.reviewInquiries', compact('inquiries'));
-=======
         return view('Module3.Admin.reviewInquiries', compact('inquiries'));
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41
     }
 
     /**
@@ -234,11 +226,7 @@ class AdminController extends BaseController
     public function showInquiryDetails($id)
     {
         $inquiry = \App\Models\Inquiry::findOrFail($id);
-<<<<<<< HEAD
-        return view('shared admin page.inquiryDetails', compact('inquiry'));
-=======
         return view('Module3.Admin.inquiryDetails', compact('inquiry'));
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41
     }
 
     /**
@@ -268,11 +256,7 @@ class AdminController extends BaseController
     {
         $inquiries = \App\Models\Inquiry::with(['agency', 'user'])->get();
         $agencies = Module1Agency::all();
-<<<<<<< HEAD
-        return view('shared admin page.assignInquiry', compact('inquiries', 'agencies'));
-=======
         return view('Module3.Admin.assignInquiry', compact('inquiries', 'agencies'));
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41
     }
 
     /**
@@ -324,11 +308,7 @@ class AdminController extends BaseController
     public function showReports()
     {
         $agencies = Module1Agency::select(['AgencyID', 'AgencyName'])->get();
-<<<<<<< HEAD
-        return view('shared admin page.generateReportPage', compact('agencies'));
-=======
         return view('Module3.Admin.generateReportPage', compact('agencies'));
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41
     }
 
     /**
@@ -550,27 +530,8 @@ class AdminController extends BaseController
                 throw new \Exception('PDF template not found: Module3.Admin.Reports.pdf');
             }
 
-<<<<<<< HEAD
-            // Transform data to match PDF template expectations
-            $pdfData = [
-                'reportTitle' => $this->getReportTitle($data),
-                'reportType' => ucfirst($data['report_type'] ?? 'Unknown'),
-                'reportCategory' => $data['report_category'] ?? 'users',
-                'dateFrom' => $data['date_from'] ?? null,
-                'dateTo' => $data['date_to'] ?? null,
-                'reportData' => $this->prepareReportDataForPDF($data),
-                'summaryStats' => $this->prepareSummaryStats($data),
-                'filters' => $this->prepareFilters($data),
-                'includeCharts' => $data['include_charts'] ?? 'no',
-                'additionalNotes' => $data['additional_notes'] ?? null,
-            ];
-
-            $pdf = Pdf::loadView('admin.reports.pdf', $pdfData);
-            $filename = $this->generatePDFFilename($data);
-=======
             $pdf = Pdf::loadView('Module3.Admin.Reports.pdf', $data);
             $filename = 'users_report_' . $data['date_from'] . '_to_' . $data['date_to'] . '.pdf';
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41
 
             Log::info('PDF generated successfully', ['filename' => $filename]);
 
@@ -864,11 +825,7 @@ class AdminController extends BaseController
                 throw new \Exception('PDF template not found: Module3.Admin.Reports.inquiry_pdf');
             }
 
-<<<<<<< HEAD
-            $pdf = Pdf::loadView('shared admin page.reports.inquiry_pdf', $data);
-=======
             $pdf = Pdf::loadView('Module3.Admin.Reports.inquiry_pdf', $data);
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41
             $filename = 'inquiry_report_' . $data['date_from'] . '_to_' . $data['date_to'] . '.pdf';
 
             Log::info('Inquiry PDF generated successfully', ['filename' => $filename]);
@@ -1092,11 +1049,7 @@ class AdminController extends BaseController
             // Set memory limit for large datasets
             ini_set('memory_limit', '512M');
 
-<<<<<<< HEAD
-            $pdf = Pdf::loadView('shared admin page.reports.assignment_pdf', $data);
-=======
             $pdf = Pdf::loadView('Module3.Admin.Reports.assignment_pdf', $data);
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41
             $pdf->setPaper('A4', 'portrait');
 
             $filename = 'assignment_report_' . now()->format('Y_m_d_His') . '.pdf';

@@ -47,11 +47,7 @@ class TestPDFGeneration extends Command
             ];
 
             $this->info('Creating PDF...');
-<<<<<<< HEAD
-            $pdf = Pdf::loadView('shared admin page.reports.pdf', $data);
-=======
             $pdf = Pdf::loadView('Module3.Admin.Reports.pdf', $data);
->>>>>>> 11bc43cf3962a9ccfa5c927c09a5f93b64644d41
 
             $this->info('✅ PDF generation successful!');
             $this->info('PDF library is working correctly.');

@@ -14,6 +14,9 @@ use App\Models\Module1\PublicUsers as Module1PublicUsers;
 use App\Models\Module1\Agency as Module1Agency;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AdminOtpMail;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -110,8 +113,13 @@ class UserController extends BaseController
         session()->flash('login_successful', true);
 
         return redirect()->route('public.user.home');
-    }    /**
+    }
+
+    /**
      * Attempt admin login - Module1
+     * AFTER IMPLEMENTATION: 2FA OTP - Credentials are verified but full session
+     * is NOT established. Instead, an OTP is generated, emailed, and the admin
+     * is redirected to the OTP verification page.
      */
     private function attemptAdminLogin($loginInput, $password)
     {
@@ -125,13 +133,161 @@ class UserController extends BaseController
         }
 
         if ($admin && Hash::check($password, $admin->AdminPassword)) {
-            session(['admin_id' => $admin->AdminID, 'admin_name' => $admin->AdminName]);
+            // ── Step 1: Credentials valid. DO NOT establish full auth session. ──
+
+            // ── Step 2: Generate a secure 6-digit numeric OTP code ──
+            $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+            // Save OTP and expiry (5 minutes) to the database
+            $admin->otp_code = $otpCode;
+            $admin->otp_expires_at = Carbon::now()->addMinutes(5);
+            $admin->save();
+
+            // ── Step 3: Send OTP via email using Laravel Mail Facade ──
+            try {
+                Mail::to($admin->AdminEmail)->send(new AdminOtpMail($otpCode, $admin->AdminName));
+            } catch (\Exception $e) {
+                Log::error('Failed to send OTP email to admin: ' . $e->getMessage());
+                return redirect()->route('login')
+                    ->withErrors(['login' => 'Failed to send OTP email. Please try again later.']);
+            }
+
+            // ── Step 4: Store ONLY partial identification in session ──
+            // The admin_id/admin_name keys are NOT set here — full session is blocked.
+            session([
+                'otp_admin_id' => $admin->AdminID,
+                'admin_email'  => $admin->AdminEmail,
+            ]);
+
             // Mark login as successful to clear form on return
             session()->flash('login_successful', true);
-            return redirect()->route('admin.home');
+
+            // Redirect to OTP verification page
+            return redirect()->route('admin.otp.show');
         }
 
         return false;
+    }
+
+    /**
+     * Show the OTP verification form - Module1
+     */
+    public function showOtpForm()
+    {
+        // Guard: only accessible if partial OTP session exists
+        if (!session('otp_admin_id')) {
+            return redirect()->route('login')
+                ->with('error', 'Please login first to receive your OTP code.');
+        }
+
+        return view('home.adminOTPVerifyPage');
+    }
+
+    /**
+     * Verify the submitted OTP code - Module1
+     * Step 5: Validates OTP against database, checks expiry, and
+     * unlocks the full authenticated admin session on success.
+     */
+    public function verifyOTP(Request $request)
+    {
+        $request->validate([
+            'otp_code' => 'required|string|size:6',
+        ], [
+            'otp_code.required' => 'Please enter the 6-digit OTP code.',
+            'otp_code.size'     => 'OTP code must be exactly 6 digits.',
+        ]);
+
+        $adminId = session('otp_admin_id');
+
+        if (!$adminId) {
+            return redirect()->route('login')
+                ->with('error', 'Session expired. Please login again.');
+        }
+
+        $admin = Module1Administrator::find($adminId);
+
+        if (!$admin) {
+            session()->forget(['otp_admin_id', 'admin_email']);
+            return redirect()->route('login')
+                ->with('error', 'Administrator account not found.');
+        }
+
+        // Check if OTP has expired
+        if (Carbon::now()->greaterThan($admin->otp_expires_at)) {
+            // Clear expired OTP from database
+            $admin->otp_code = null;
+            $admin->otp_expires_at = null;
+            $admin->save();
+
+            session()->forget(['otp_admin_id', 'admin_email']);
+
+            return redirect()->route('login')
+                ->with('error', 'OTP code has expired. Please login again to receive a new code.');
+        }
+
+        // Verify OTP code matches
+        if ($request->otp_code !== $admin->otp_code) {
+            return redirect()->route('admin.otp.show')
+                ->with('error', 'Invalid OTP code. Please try again.');
+        }
+
+        // ── OTP Valid: Unlock full authenticated session ──
+
+        // Clear OTP from database (single-use)
+        $admin->otp_code = null;
+        $admin->otp_expires_at = null;
+        $admin->save();
+
+        // Clear partial OTP session data
+        session()->forget(['otp_admin_id', 'admin_email']);
+
+        // Establish the full admin session (same as original login)
+        session(['admin_id' => $admin->AdminID, 'admin_name' => $admin->AdminName]);
+
+        Log::info('Admin 2FA login successful', ['admin_id' => $admin->AdminID]);
+
+        // Redirect to Admin Dashboard
+        return redirect()->route('admin.home');
+    }
+
+    /**
+     * Resend OTP code to admin's email - Module1
+     */
+    public function resendOTP()
+    {
+        $adminId = session('otp_admin_id');
+
+        if (!$adminId) {
+            return redirect()->route('login')
+                ->with('error', 'Session expired. Please login again.');
+        }
+
+        $admin = Module1Administrator::find($adminId);
+
+        if (!$admin) {
+            session()->forget(['otp_admin_id', 'admin_email']);
+            return redirect()->route('login')
+                ->with('error', 'Administrator account not found.');
+        }
+
+        // Generate new OTP
+        $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        $admin->otp_code = $otpCode;
+        $admin->otp_expires_at = Carbon::now()->addMinutes(5);
+        $admin->save();
+
+        // Send new OTP via email
+        try {
+            Mail::to($admin->AdminEmail)->send(new AdminOtpMail($otpCode, $admin->AdminName));
+        } catch (\Exception $e) {
+            Log::error('Failed to resend OTP email: ' . $e->getMessage());
+            return redirect()->route('admin.otp.show')
+                ->with('error', 'Failed to resend OTP email. Please try again.');
+        }
+
+        return redirect()->route('admin.otp.show')
+            ->with('info', 'A new OTP code has been sent to your email.');
     }
 
     /**
