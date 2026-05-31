@@ -28,15 +28,15 @@ Route::get('/', function () {
 })->name('home');
 
 // Registration
-Route::get('register', [Module3UserController::class, 'showRegistrationForm'])->name('register');
-Route::post('register', [Module3UserController::class, 'register']);
+Route::get('register', [Module1UserController::class, 'showRegistrationForm'])->name('register');
+Route::post('register', [Module1UserController::class, 'register']);
 
 // Login
-Route::get('login', [Module3UserController::class, 'showLoginForm'])->name('login');
-Route::post('login', [Module3UserController::class, 'login']);
+Route::get('login', [Module1UserController::class, 'showLoginForm'])->name('login');
+Route::post('login', [Module1UserController::class, 'login']);
 
 // Logout
-Route::post('logout', [Module3UserController::class, 'logout'])->name('logout');
+Route::post('logout', [Module1UserController::class, 'logout'])->name('logout');
 
 // Admin 2FA OTP Routes
 Route::get('/admin/otp-verify', [Module3AdminController::class, 'showOtpForm'])->name('admin.otp.show');
@@ -44,10 +44,10 @@ Route::post('/admin/otp-verify', [Module3AdminController::class, 'verifyOTP'])->
 Route::post('/admin/otp-resend', [Module3AdminController::class, 'resendOTP'])->name('admin.otp.resend');
 
 // Password recovery routes
-Route::get('/password/recovery', [Module3UserController::class, 'showRecoveryForm'])->name('password.recovery');
-Route::post('/password/email', [Module3UserController::class, 'sendResetLink'])->name('password.email');
-Route::post('/password/reset', [Module3UserController::class, 'resetPassword'])->name('password.reset');
-Route::get('/password/recovery/cancel', [Module3UserController::class, 'cancelPasswordReset'])->name('password.recovery.cancel');
+Route::get('/password/recovery', [Module1UserController::class, 'showRecoveryForm'])->name('password.recovery');
+Route::post('/password/email', [Module1UserController::class, 'sendResetLink'])->name('password.email');
+Route::post('/password/reset', [Module1UserController::class, 'resetPassword'])->name('password.reset');
+Route::get('/password/recovery/cancel', [Module1UserController::class, 'cancelPasswordReset'])->name('password.recovery.cancel');
 
 
 // Manage Profile (protected)
@@ -68,11 +68,9 @@ Route::get('/public-user-home', function () {
 
 Route::put('/profile/update', [Module3UserController::class, 'updateProfile'])->name('profile.update');
 
-Route::post('/profile/password/verify', [Module3UserController::class, 'verifyPassword'])->name('password.verify');
-Route::put('/profile/password/update', [Module3UserController::class, 'updatePassword'])->name('password.update');
-Route::get('/profile/password/edit', function () {
-    return view('Module3.PublicUser.editPasswordPage');
-})->name('password.edit');
+Route::post('/profile/password/verify', [Module1UserController::class, 'verifyPassword'])->name('password.verify');
+Route::put('/profile/password/update', [Module1UserController::class, 'updatePassword'])->name('password.update');
+Route::get('/profile/password/edit', [Module1UserController::class, 'showEditPassword'])->name('password.edit');
 
 Route::get('/password/edit/reset', function () {
     session()->forget('password_verified');
@@ -126,12 +124,12 @@ Route::get('/test-notifications-debug', function () {
             'csrf_token' => csrf_token(),
         ]
     ];
-    
+
     if (Auth::check()) {
         $debug['user_name'] = Auth::user()->UserName ?? 'Unknown';
         $debug['user_table'] = Auth::user()->getTable() ?? 'Unknown';
     }
-    
+
     return response()->json($debug, 200, [], JSON_PRETTY_PRINT);
 })->name('test.notifications.debug');
 
@@ -222,7 +220,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/public/notifications', [NotificationController::class, 'publicNotifications'])->name('public.notifications');
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread.count');
     Route::post('/notifications/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark.read');
-    
+
     // Status history for inquiries
     Route::get('/inquiry/{inquiryId}/status-history', [NotificationController::class, 'getStatusHistory'])->name('inquiry.status.history');
 });
@@ -239,13 +237,13 @@ Route::prefix('admin')->middleware('admin.auth')->group(function () {
 Route::prefix('agency')->middleware(['auth'])->group(function () {
     // Agency updates inquiry status and notifies public user
     Route::post('/inquiry/update-status', [NotificationController::class, 'sendStatusUpdateToPublic'])->name('agency.inquiry.notify.status');
-    
+
     // Agency notifies admin of inquiry completion
     Route::post('/inquiry/notify-completed', [NotificationController::class, 'notifyInquiryCompleted'])->name('agency.inquiry.notify.completed');
-    
+
     // Agency requests reassignment
     Route::post('/inquiry/request-reassignment', [NotificationController::class, 'requestReassignment'])->name('agency.inquiry.notify.reassignment');
-    
+
     // Agency requests clarification from admin
     Route::post('/inquiry/request-clarification', [NotificationController::class, 'requestClarification'])->name('agency.inquiry.request.clarification');
 });
@@ -254,7 +252,7 @@ Route::prefix('agency')->middleware(['auth'])->group(function () {
 Route::prefix('api')->middleware(['auth'])->group(function () {
     // Get status history for an inquiry
     Route::get('/inquiry/{inquiryId}/status-history', [NotificationController::class, 'getStatusHistory'])->name('api.inquiry.status.history');
-    
+
     // Get unread notification count for current user
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('api.notifications.unread.count');
 });
@@ -265,14 +263,14 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/inquiry/{inquiryId}/investigation-notes', [App\Http\Controllers\InvestigationNoteController::class, 'show'])->name('admin.investigation.notes.show');
     });
-    
+
     // Agency routes for managing investigation notes
     Route::prefix('agency')->group(function () {
         Route::get('/inquiry/{inquiryId}/investigation-notes', [App\Http\Controllers\InvestigationNoteController::class, 'agencyView'])->name('agency.investigation.notes.index');
         Route::get('/inquiry/{inquiryId}/investigation-notes/create', [App\Http\Controllers\InvestigationNoteController::class, 'create'])->name('agency.investigation.notes.create');
         Route::post('/inquiry/{inquiryId}/investigation-notes', [App\Http\Controllers\InvestigationNoteController::class, 'store'])->name('agency.investigation.notes.store');
     });
-    
+
     // Common routes for file downloads
     Route::get('/investigation-attachment/{attachmentId}/download', [App\Http\Controllers\InvestigationNoteController::class, 'downloadAttachment'])->name('investigation.attachment.download');
 });

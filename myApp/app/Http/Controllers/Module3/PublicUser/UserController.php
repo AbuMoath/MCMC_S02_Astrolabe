@@ -173,7 +173,7 @@ class UserController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        
+
         $user = Auth::user();
         return view('Module3.PublicUser.manageProfilePage', compact('user'));
     }
@@ -301,7 +301,7 @@ class UserController extends Controller
      */
     public function showRecoveryForm(): View
     {
-        return view('auth.recovery');
+        return view('home.recovaryPasswordPage');
     }
 
     /**

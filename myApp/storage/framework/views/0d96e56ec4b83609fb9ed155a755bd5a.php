@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>Password Recovery — AuthenticityHub | MCMC</title>
     <meta name="description" content="Recover your AuthenticityHub password securely.">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -215,7 +215,7 @@
 
     <!-- NAVBAR -->
     <nav class="navbar">
-        <a href="{{ route('home') }}" class="nav-brand">
+        <a href="<?php echo e(route('home')); ?>" class="nav-brand">
             <div class="nav-logo-icon"><i class="fas fa-shield-halved"></i></div>
             <div>
                 <span class="nav-brand-name">AuthenticityHub</span>
@@ -225,7 +225,7 @@
         <div class="nav-links">
             <a href="#" id="nav-recovery-link" class="nav-link active"><i class="fas fa-key"></i> Recovery</a>
             <a href="#" id="nav-help-link" class="nav-link"><i class="fas fa-circle-question"></i> Help</a>
-            <a href="{{ route('login') }}" class="nav-link" style="color:var(--blue-light);"><i class="fas fa-arrow-right-to-bracket"></i> Login</a>
+            <a href="<?php echo e(route('login')); ?>" class="nav-link" style="color:var(--blue-light);"><i class="fas fa-arrow-right-to-bracket"></i> Login</a>
         </div>
     </nav>
 
@@ -254,38 +254,66 @@
                     Your email has been verified!
                 </div>
 
-                @if (session('status'))
-                    <div class="alert alert-success"><i class="fas fa-circle-check"></i> <span>{{ session('status') }}</span></div>
-                @endif
-                @if (session('phone_required'))
-                    <div class="alert alert-warning"><i class="fas fa-triangle-exclamation"></i> <span>{{ session('phone_required') }}</span></div>
-                @endif
+                <?php if(session('status')): ?>
+                    <div class="alert alert-success"><i class="fas fa-circle-check"></i> <span><?php echo e(session('status')); ?></span></div>
+                <?php endif; ?>
+                <?php if(session('phone_required')): ?>
+                    <div class="alert alert-warning"><i class="fas fa-triangle-exclamation"></i> <span><?php echo e(session('phone_required')); ?></span></div>
+                <?php endif; ?>
 
                 <!-- AGENCY SETUP MODE -->
-                @if (session('phone_verification_agency_id'))
+                <?php if(session('phone_verification_agency_id')): ?>
                     <div id="agency-setup-container">
-                        <form method="POST" action="{{ route('agency.phone.update') }}" novalidate>
-                            @csrf
+                        <form method="POST" action="<?php echo e(route('agency.phone.update')); ?>" novalidate>
+                            <?php echo csrf_field(); ?>
                             <div class="form-group">
                                 <label class="form-label" for="phone">Phone Number</label>
                                 <div class="input-wrap">
                                     <i class="fas fa-phone input-icon-left"></i>
-                                    <input type="tel" name="phone" id="phone" value="{{ old('phone') }}" placeholder="Enter phone number" class="form-input @error('phone') is-invalid @enderror" required />
+                                    <input type="tel" name="phone" id="phone" value="<?php echo e(old('phone')); ?>" placeholder="Enter phone number" class="form-input <?php $__errorArgs = ['phone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required />
                                 </div>
-                                @error('phone')
-                                    <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span>{{ $errors->first('phone') }}</span></div>
-                                @enderror
+                                <?php $__errorArgs = ['phone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span><?php echo e($errors->first('phone')); ?></span></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label" for="password">New Password</label>
                                 <div class="input-wrap">
                                     <i class="fas fa-lock input-icon-left"></i>
-                                    <input type="password" name="password" id="password" placeholder="New Password" class="form-input @error('password') is-invalid @enderror" required />
+                                    <input type="password" name="password" id="password" placeholder="New Password" class="form-input <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required />
                                 </div>
-                                @error('password')
-                                    <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span>{{ $errors->first('password') }}</span></div>
-                                @enderror
+                                <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span><?php echo e($errors->first('password')); ?></span></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
 
                             <div class="form-group">
@@ -297,44 +325,72 @@
                             </div>
 
                             <button type="submit" class="btn-submit">Complete Setup</button>
-                            <a href="{{ route('login') }}" class="btn-secondary" style="text-decoration:none;">Back to Login</a>
+                            <a href="<?php echo e(route('login')); ?>" class="btn-secondary" style="text-decoration:none;">Back to Login</a>
                         </form>
                     </div>
-                @else
+                <?php else: ?>
                     <!-- NORMAL EMAIL/PASSWORD FORMS -->
                     <!-- 1. Email verification form -->
-                    <div id="email-form-container" style="display: {{ $errors->has('password') ? 'none' : 'block' }};">
-                        <form method="POST" action="{{ route('password.email') }}" novalidate id="email-form">
-                            @csrf
+                    <div id="email-form-container" style="display: <?php echo e($errors->has('password') ? 'none' : 'block'); ?>;">
+                        <form method="POST" action="<?php echo e(route('password.email')); ?>" novalidate id="email-form">
+                            <?php echo csrf_field(); ?>
                             <div class="form-group">
                                 <label class="form-label" for="email">Email Address</label>
                                 <div class="input-wrap">
                                     <i class="fas fa-envelope input-icon-left"></i>
-                                    <input type="email" name="email" id="email" value="{{ old('email') }}" placeholder="you@example.com" class="form-input @error('email') is-invalid @enderror" required />
+                                    <input type="email" name="email" id="email" value="<?php echo e(old('email')); ?>" placeholder="you@example.com" class="form-input <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required />
                                 </div>
-                                @error('email')
-                                    <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span>{{ $errors->first('email') }}</span></div>
-                                @enderror
+                                <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span><?php echo e($errors->first('email')); ?></span></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                             <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Send Recovery Link</button>
-                            <a href="{{ route('login') }}" class="btn-secondary" style="text-decoration:none;"><i class="fas fa-arrow-left"></i> Back to Login</a>
+                            <a href="<?php echo e(route('login')); ?>" class="btn-secondary" style="text-decoration:none;"><i class="fas fa-arrow-left"></i> Back to Login</a>
                         </form>
                     </div>
 
                     <!-- 2. Password reset form -->
-                    <div id="password-form-container" style="display: {{ $errors->has('password') ? 'block' : 'none' }};">
-                        <form method="POST" action="{{ route('password.reset') }}" novalidate>
-                            @csrf
-                            <input type="hidden" name="email" id="verified-email" value="{{ old('email') }}">
+                    <div id="password-form-container" style="display: <?php echo e($errors->has('password') ? 'block' : 'none'); ?>;">
+                        <form method="POST" action="<?php echo e(route('password.reset')); ?>" novalidate>
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="email" id="verified-email" value="<?php echo e(old('email')); ?>">
                             <div class="form-group">
                                 <label class="form-label" for="new-password">New Password</label>
                                 <div class="input-wrap">
                                     <i class="fas fa-lock input-icon-left"></i>
-                                    <input type="password" name="password" id="new-password" placeholder="Create new password" class="form-input @error('password') is-invalid @enderror" required />
+                                    <input type="password" name="password" id="new-password" placeholder="Create new password" class="form-input <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required />
                                 </div>
-                                @error('password')
-                                    <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span>{{ $errors->first('password') }}</span></div>
-                                @enderror
+                                <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span><?php echo e($errors->first('password')); ?></span></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="confirm-password">Confirm Password</label>
@@ -347,7 +403,7 @@
                             <button type="button" id="back-to-email" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</button>
                         </form>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
 
             <!-- HELP CONTENT VIEW -->
@@ -387,11 +443,11 @@
     <!-- FOOTER -->
     <footer>
         <div class="footer-inner">
-            <p>&copy; {{ date('Y') }} AuthenticityHub — <a href="https://www.mcmc.gov.my" target="_blank">MCMC Malaysia</a>. All rights reserved.</p>
+            <p>&copy; <?php echo e(date('Y')); ?> AuthenticityHub — <a href="https://www.mcmc.gov.my" target="_blank">MCMC Malaysia</a>. All rights reserved.</p>
             <div class="footer-links">
                 <a href="#">Privacy Policy</a>
                 <a href="#">Terms of Use</a>
-                <a href="{{ route('home') }}">Home</a>
+                <a href="<?php echo e(route('home')); ?>">Home</a>
             </div>
         </div>
     </footer>
@@ -431,14 +487,14 @@
             }
 
             // Check if we have password validation errors on page load
-            @if ($errors->has('password') && old('email'))
-                if (verifiedEmailInput) verifiedEmailInput.value = '{{ old('email') }}';
+            <?php if($errors->has('password') && old('email')): ?>
+                if (verifiedEmailInput) verifiedEmailInput.value = '<?php echo e(old('email')); ?>';
                 const newPasswordField = document.getElementById('new-password');
                 if (newPasswordField) newPasswordField.focus();
                 
                 if (cardTitleEl) cardTitleEl.textContent = 'Create New Password';
                 if (cardSubtitleEl) cardSubtitleEl.textContent = 'Secure your account with a strong password';
-            @endif
+            <?php endif; ?>
 
             // Toggle Help & Recovery Views
             function showHelp() {
@@ -484,7 +540,7 @@
 
                     loadingOverlay.style.display = 'flex';
 
-                    fetch('{{ route('password.email') }}', {
+                    fetch('<?php echo e(route('password.email')); ?>', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -553,3 +609,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH C:\Users\khale\Desktop\MCMC_S02_Astrolabe\myApp\resources\views/home/recovaryPasswordPage.blade.php ENDPATH**/ ?>

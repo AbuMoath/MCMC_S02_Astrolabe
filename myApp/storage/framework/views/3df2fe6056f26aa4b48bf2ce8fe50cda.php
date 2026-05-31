@@ -341,14 +341,14 @@
 
     <!-- NAVBAR -->
     <nav class="navbar">
-        <a href="{{ route('home') }}" class="nav-brand">
+        <a href="<?php echo e(route('home')); ?>" class="nav-brand">
             <div class="nav-logo-icon"><i class="fas fa-shield-halved"></i></div>
             <div>
                 <span class="nav-brand-name">AuthenticityHub</span>
                 <span class="nav-brand-sub">MCMC Official Platform</span>
             </div>
         </a>
-        <a href="{{ route('login') }}" class="nav-link">
+        <a href="<?php echo e(route('login')); ?>" class="nav-link">
             Already have an account? <strong style="color:var(--blue-light);">Sign In</strong>
         </a>
     </nav>
@@ -363,22 +363,17 @@
                 <p class="card-subtitle">Join AuthenticityHub to submit and track public inquiries with MCMC</p>
             </div>
 
-            {{-- Success flash message --}}
-            @if (session('message'))
+            
+            <?php if(session('message')): ?>
                 <div class="alert alert-success">
                     <i class="fas fa-circle-check"></i>
-                    <span>{{ session('message') }}</span>
+                    <span><?php echo e(session('message')); ?></span>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- ======================================================
-                 REGISTRATION FORM
-                 Backend: POST {{ route('register') }}
-                 Controller: Module3\PublicUser\UserController@register
-                 Fields: UserName, UserEmail, UserPassword, UserPassword_confirmation
-            ====================================================== --}}
-            <form method="POST" action="{{ route('register') }}" novalidate id="registerForm">
-                @csrf
+            
+            <form method="POST" action="<?php echo e(route('register')); ?>" novalidate id="registerForm">
+                <?php echo csrf_field(); ?>
 
                 <!-- Username -->
                 <div class="form-row">
@@ -390,25 +385,46 @@
                                 type="text"
                                 id="UserName"
                                 name="UserName"
-                                value="{{ old('UserName') }}"
+                                value="<?php echo e(old('UserName')); ?>"
                                 placeholder="Choose a username"
                                 autocomplete="username"
-                                class="form-input @error('UserName') is-invalid @enderror"
+                                class="form-input <?php $__errorArgs = ['UserName'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                                 required
                             />
-                            @error('UserName')
+                            <?php $__errorArgs = ['UserName'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                 <span class="input-status-icon invalid"><i class="fas fa-circle-xmark"></i></span>
-                            @else
-                                @if(old('UserName'))
+                            <?php else: ?>
+                                <?php if(old('UserName')): ?>
                                     <span class="input-status-icon valid" id="usernameValidIcon"><i class="fas fa-circle-check"></i></span>
-                                @endif
-                            @enderror
+                                <?php endif; ?>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
-                        @error('UserName')
-                            <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span>{{ $message }}</span></div>
-                        @else
+                        <?php $__errorArgs = ['UserName'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span><?php echo e($message); ?></span></div>
+                        <?php else: ?>
                             <p class="field-hint">4–20 characters: letters, numbers, underscores only.</p>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
 
@@ -422,23 +438,44 @@
                                 type="email"
                                 id="UserEmail"
                                 name="UserEmail"
-                                value="{{ old('UserEmail') }}"
+                                value="<?php echo e(old('UserEmail')); ?>"
                                 placeholder="you@example.com"
                                 autocomplete="email"
-                                class="form-input @error('UserEmail') is-invalid @enderror"
+                                class="form-input <?php $__errorArgs = ['UserEmail'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                                 required
                             />
-                            @error('UserEmail')
+                            <?php $__errorArgs = ['UserEmail'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                 <span class="input-status-icon invalid"><i class="fas fa-circle-xmark"></i></span>
-                            @else
-                                @if(old('UserEmail'))
+                            <?php else: ?>
+                                <?php if(old('UserEmail')): ?>
                                     <span class="input-status-icon valid"><i class="fas fa-circle-check"></i></span>
-                                @endif
-                            @enderror
+                                <?php endif; ?>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
-                        @error('UserEmail')
-                            <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span>{{ $message }}</span></div>
-                        @enderror
+                        <?php $__errorArgs = ['UserEmail'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span><?php echo e($message); ?></span></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
 
@@ -454,16 +491,30 @@
                                 name="UserPassword"
                                 placeholder="Create a strong password"
                                 autocomplete="new-password"
-                                class="form-input @error('UserPassword') is-invalid @enderror"
+                                class="form-input <?php $__errorArgs = ['UserPassword'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                                 required
                             />
                             <button type="button" class="input-btn-right" id="togglePw1" aria-label="Toggle password">
                                 <i class="fas fa-eye" id="pw1Icon"></i>
                             </button>
                         </div>
-                        @error('UserPassword')
-                            <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span>{{ $message }}</span></div>
-                        @enderror
+                        <?php $__errorArgs = ['UserPassword'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <div class="field-error"><i class="fas fa-triangle-exclamation"></i><span><?php echo e($message); ?></span></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
                         <!-- Strength meter -->
                         <div class="strength-bar" id="strengthBar">
@@ -528,7 +579,7 @@
             <div class="card-divider"><span>Already registered?</span></div>
 
             <div class="login-prompt">
-                Have an account? <a href="{{ route('login') }}" id="goLoginLink">Sign in here &rarr;</a>
+                Have an account? <a href="<?php echo e(route('login')); ?>" id="goLoginLink">Sign in here &rarr;</a>
             </div>
 
             <div class="security-note">
@@ -541,11 +592,11 @@
     <!-- FOOTER -->
     <footer>
         <div class="footer-inner">
-            <p>&copy; {{ date('Y') }} AuthenticityHub — <a href="https://www.mcmc.gov.my" target="_blank">MCMC Malaysia</a>. All rights reserved.</p>
+            <p>&copy; <?php echo e(date('Y')); ?> AuthenticityHub — <a href="https://www.mcmc.gov.my" target="_blank">MCMC Malaysia</a>. All rights reserved.</p>
             <div class="footer-links">
                 <a href="#">Privacy Policy</a>
                 <a href="#">Terms of Use</a>
-                <a href="{{ route('home') }}">Home</a>
+                <a href="<?php echo e(route('home')); ?>">Home</a>
             </div>
         </div>
     </footer>
@@ -699,3 +750,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH C:\Users\khale\Desktop\MCMC_S02_Astrolabe\myApp\resources\views/Module1/publicUser/registerPage.blade.php ENDPATH**/ ?>

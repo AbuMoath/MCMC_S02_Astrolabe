@@ -2,752 +2,609 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — AuthenticityHub | MCMC</title>
+    <meta name="description" content="Securely sign in to your AuthenticityHub account to track your inquiries or access the MCMC government portal.">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        :root {
+            --navy: #0b1f3a;
+            --navy-mid: #112d52;
+            --blue: #1d5fdb;
+            --blue-light: #3b82f6;
+            --cyan: #06b6d4;
+            --gold: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --glass-bg: rgba(255,255,255,0.06);
+            --glass-border: rgba(255,255,255,0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #6a7fd0, #6bc5f3);
-            margin: 0;
-            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--navy);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
         }
 
-        /* Smooth transitions for all elements */
-        * {
-            transition: all 0.4s ease-in-out;
+        /* BACKGROUND */
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 70% 60% at 10% 10%, rgba(29,95,219,0.22) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 90% 80%, rgba(6,182,212,0.12) 0%, transparent 55%),
+                linear-gradient(160deg, #0b1f3a 0%, #07152a 60%, #050f1e 100%);
+        }
+        .bg-grid {
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(29,95,219,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(29,95,219,0.05) 1px, transparent 1px);
+            background-size: 60px 60px;
         }
 
+        /* NAVBAR */
+        .navbar {
+            position: relative; z-index: 100;
+            padding: 0 2rem; height: 70px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(11,31,58,0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+        }
 
+        .nav-brand {
+            display: flex; align-items: center; gap: 0.75rem;
+            text-decoration: none;
+        }
+        .nav-logo-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--blue), var(--cyan));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(29,95,219,0.4);
+        }
+        .nav-logo-icon i { color:#fff; font-size:0.95rem; }
+        .nav-brand-name {
+            font-weight: 800; font-size: 1rem; color: #fff; letter-spacing: -0.01em;
+        }
+        .nav-brand-sub {
+            display:block; font-size: 0.58rem; font-weight:500; color:var(--cyan);
+            letter-spacing:0.05em; text-transform:uppercase;
+        }
 
-        /* Top Bar Styling */
-        .top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 56px;
-            background: #d2dbf6;
+        .nav-link {
+            font-size: 0.88rem; font-weight: 500;
+            color: var(--text-secondary); text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .nav-link:hover { color: #fff; }
+
+        /* MAIN LAYOUT */
+        .page-wrapper {
+            position: relative; z-index: 1;
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 2rem;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.07);
+            padding: 3rem 1.5rem;
         }
 
-        .top-bar .logo {
-            font-weight: 700;
-            font-size: 1.3rem;
-            color: #283d63;
-            letter-spacing: 0.02em;
-            margin-right: 2rem;
-            margin-left: 0;
-            position: absolute;
-            left: 2rem;
+        /* CARD */
+        .auth-card {
+            width: 100%; max-width: 460px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.75rem 2.5rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+            animation: cardIn 0.6s ease both;
         }
 
-        .top-bar nav {
-            margin-left: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1.2rem;
-            position: absolute;
-            right: 2rem;
+        @keyframes cardIn {
+            from { opacity:0; transform:translateY(28px) scale(0.97); }
+            to   { opacity:1; transform:translateY(0) scale(1); }
         }
 
-        .top-bar nav a {
-            color: #283d63;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-
-        .top-bar nav a:hover {
-            color: #0057ff;
-        }
-
-        /* Sidebar Styling */
-        .sidebar {
-            position: fixed;
-            top: 56px;
-            left: 0;
-            width: 14rem;
-            height: calc(100vh - 56px);
-            background: #d2dbf6;
-            border-top-right-radius: 1.5rem;
-            border-bottom-right-radius: 1.5rem;
-            box-shadow: 0 4px 15px rgba(40, 61, 99, 0.1);
-            padding: 1.5rem 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            z-index: 99;
-        }
-
-        .sidebar-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            padding: 0 1rem;
-        }
-
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            color: #283d63;
-            text-decoration: none;
-            font-weight: 500;
-            border-radius: 0.75rem;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-link i {
-            font-size: 1.1rem;
-            width: 1.25rem;
+        /* Card Header */
+        .card-header {
             text-align: center;
+            margin-bottom: 2rem;
         }
 
-        .sidebar-link:hover {
-            background: #b9c8f6;
-            color: #0057ff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 87, 255, 0.2);
+        .card-icon {
+            width: 60px; height: 60px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(29,95,219,0.2), rgba(6,182,212,0.15));
+            border: 1px solid rgba(29,95,219,0.3);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.25rem;
+            font-size: 1.5rem;
+            color: var(--blue-light);
         }
 
-
-        /* Main Content Area */
-        .main-content {
-            margin-left: 14rem;
-            margin-top: 56px;
-            padding: 2rem;
-            min-height: calc(100vh - 56px);
-            background: transparent;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .card {
-            background: #eef2ff;
-            padding: 2rem 2.5rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            max-width: 450px;
-            width: 100%;
-            box-sizing: border-box;
-            backdrop-filter: blur(10px);
-        }
-
-        .card:hover {
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
-        }
-
-        .input-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .input-icon {
-            background: #5c5c5c;
-            border-radius: 16px 0 0 16px;
-            padding: 0.85rem 1rem;
-            display: flex;
-            align-items: center;
-            height: 54px;
-        }
-
-        .input-icon i {
+        .card-title {
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
             color: #fff;
-            font-size: 1.3rem;
+            margin-bottom: 0.4rem;
         }
 
-        .input-smooth {
-            border-radius: 0 16px 16px 0;
-            background: linear-gradient(145deg, #e6ebfc, #c5cee9);
-            box-shadow: inset 6px 6px 8px rgba(59, 130, 246, 0.2), inset -6px -6px 8px rgba(255, 255, 255, 0.7);
-            border: none;
-            padding: 1rem 1.25rem;
-            font-size: 1.125rem;
-            color: #283d63;
-            font-weight: 500;
-            width: 100%;
-            cursor: text;
-            transition: background 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
-            outline: none;
+        .card-subtitle {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
         }
 
-        /* Light Effect on Hover */
-        .input-smooth:hover {
-            background: linear-gradient(145deg, #c5cee9, #e6ebfc);
-            box-shadow: inset 6px 6px 8px rgba(59, 130, 246, 0.3), inset -6px -6px 8px rgba(255, 255, 255, 0.6),
-                0 0 8px rgba(59, 130, 246, 0.5);
-        }
-
-        .input-smooth:focus {
-            outline: none;
-            box-shadow: inset 6px 6px 8px rgba(59, 130, 246, 0.6), inset -6px -6px 8px rgba(255, 255, 255, 0.9),
-                0 0 12px rgba(59, 130, 246, 0.7);
-            background: linear-gradient(145deg, #c5cee9, #e6ebfc);
-            color: #1a2a4c;
-            font-weight: 600;
-            transform: scale(1.02);
-        }
-
-        /* Add validation error styling */
-        .input-smooth.is-invalid {
-            border: 2px solid #dc3545 !important;
-            box-shadow: 0 0 16px 4px rgba(220, 53, 69, 0.3) !important;
-        }
-
-        /* error styling for login icon */
-        .input-icon.is-invalid {
-            background: #dc3545 !important;
-            border: 2px solid #dc3545 !important;
-        }
-
-        .input-icon.is-invalid i {
-            color: #fff !important;
-        }
-
-        .error-message {
-            color: #dc3545;
+        /* Alerts */
+        .alert {
+            display: flex; align-items: flex-start; gap: 0.75rem;
+            padding: 0.9rem 1.1rem;
+            border-radius: 12px;
             font-size: 0.875rem;
             font-weight: 500;
-            margin-top: 0.5rem;
-            margin-bottom: 1rem;
-            display: block;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        .alert i { margin-top: 0.05rem; flex-shrink:0; }
+        .alert-success {
+            background: rgba(16,185,129,0.12);
+            border: 1px solid rgba(16,185,129,0.3);
+            color: #6ee7b7;
+        }
+        .alert-error {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #fca5a5;
         }
 
-        /* Alert message styling */
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
+        /* Form */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon-left {
+            position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 1;
+            transition: color 0.2s ease;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.75rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.25s ease;
+            -webkit-appearance: none;
+        }
+
+        .form-input::placeholder { color: rgba(148,163,184,0.5); }
+
+        .form-input:hover {
+            border-color: rgba(29,95,219,0.4);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .form-input:focus {
+            border-color: var(--blue-light);
+            background: rgba(29,95,219,0.08);
+            box-shadow: 0 0 0 3px rgba(29,95,219,0.15);
+        }
+
+        .form-input:focus ~ .input-icon-left,
+        .input-wrap:focus-within .input-icon-left {
+            color: var(--blue-light);
+        }
+
+        .form-input.is-invalid {
+            border-color: var(--danger) !important;
+            background: rgba(239,68,68,0.06) !important;
+            box-shadow: 0 0 0 3px rgba(239,68,68,0.12) !important;
+        }
+
+        .input-btn-right {
+            position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer;
+            color: var(--text-secondary); font-size: 0.9rem;
+            padding: 0.25rem; border-radius: 4px;
+            transition: color 0.2s ease;
+        }
+        .input-btn-right:hover { color: #fff; }
+
+        .field-error {
+            display: flex; align-items: center; gap: 0.4rem;
+            margin-top: 0.45rem;
+            font-size: 0.8rem;
+            color: #fca5a5;
             font-weight: 500;
         }
+        .field-error i { font-size: 0.75rem; }
 
-        .alert-success {
-            background: #dcfce7;
-            color: #166534;
+        /* Options row */
+        .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+            margin-top: 0.25rem;
         }
 
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .btn-smooth {
-            background: linear-gradient(145deg, #4f8cff, #0057ff);
-            color: #ffffff;
-            font-weight: 600;
-            border-radius: 0.75rem;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-size: 1.125rem;
-            width: 100%;
+        .remember-label {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.85rem; color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
-            margin-top: 1.2rem;
+            user-select: none;
         }
-
-        .btn-smooth:hover {
-            background: linear-gradient(145deg, #0057ff, #003bbd);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(79, 140, 255, 0.4);
-        }
-
-        .btn-smooth:active {
-            transform: translateY(0px);
-        }
-
-        .register-link {
-            display: inline-block;
-            background: linear-gradient(145deg, #4f8cff, #0057ff);
-            color: #ffffff;
-            font-weight: 600;
-            border-radius: 0.75rem;
-            padding: 0.75rem 1.5rem;
-            width: 100%;
-            max-width: 350px;
-            margin: 0 auto;
-            font-size: 1.2rem;
-            text-decoration: none;
-            box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .register-link:hover {
-            background: linear-gradient(145deg, #0057ff, #003bbd);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(79, 140, 255, 0.4);
+        .remember-label input[type="checkbox"] {
+            width: 15px; height: 15px;
+            accent-color: var(--blue-light);
+            cursor: pointer;
         }
 
         .forgot-link {
-            color: #5f5f5f;
-            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--blue-light);
             text-decoration: none;
-            margin-left: 6px;
-            transition: color 0.2s;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .forgot-link:hover { color: var(--cyan); text-decoration: underline; }
+
+        /* Submit button */
+        .btn-submit {
+            width: 100%;
+            padding: 0.9rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, var(--blue), #1a4fc4);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 24px rgba(29,95,219,0.35);
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            font-family: 'Inter', sans-serif;
         }
 
-        .forgot-link:hover {
-            color: #000000;
-            text-decoration: underline;
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #2670f5, var(--blue));
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(29,95,219,0.5);
         }
 
-        /* Animation Keyframes */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
+        .btn-submit:active { transform: translateY(0); }
 
-            to {
-                opacity: 1;
-            }
+        .btn-submit:disabled {
+            opacity: 0.7; cursor: not-allowed; transform: none;
         }
 
-        @keyframes slideInUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        /* Divider */
+        .card-divider {
+            display: flex; align-items: center; gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .card-divider::before, .card-divider::after {
+            content:''; flex:1; height:1px; background:var(--glass-border);
+        }
+        .card-divider span {
+            font-size: 0.78rem; color: var(--text-secondary); font-weight: 500;
         }
 
-        @keyframes shake {
+        /* Register link */
+        .register-prompt {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .register-prompt a {
+            color: var(--blue-light);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .register-prompt a:hover { color: var(--cyan); }
 
-            0%,
-            100% {
-                transform: translateX(0);
-            }
+        /* Security note */
+        .security-note {
+            display: flex; align-items: center; justify-content: center;
+            gap: 0.5rem; margin-top: 1.5rem;
+            font-size: 0.75rem; color: rgba(148,163,184,0.6);
+        }
+        .security-note i { color: var(--success); font-size: 0.8rem; }
 
-            25% {
-                transform: translateX(-5px);
-            }
-
-            75% {
-                transform: translateX(5px);
-            }
+        /* OTP STATE PANEL (hidden by default, shown after password via JS/backend) */
+        #otp-state {
+            display: none; /* Laravel backend controls this flow via redirect */
         }
 
-        /* Page Load Animation */
-        body {
-            opacity: 0;
-            animation: fadeIn 0.8s ease-in-out forwards;
+        .otp-preview-label {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        .otp-preview-label strong { color: var(--cyan); }
+
+        .otp-boxes {
+            display: flex; gap: 0.6rem; justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .otp-box {
+            width: 52px; height: 58px;
+            text-align: center; font-size: 1.4rem; font-weight: 700;
+            color: #fff;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+        }
+        .otp-box:focus {
+            border-color: var(--blue-light);
+            background: rgba(29,95,219,0.1);
+            box-shadow: 0 0 0 3px rgba(29,95,219,0.2);
         }
 
-        /* Card Animation */
-        .card {
-            opacity: 0;
-            animation: slideInUp 0.8s ease-out forwards 0.3s;
+        /* FOOTER */
+        footer {
+            position: relative; z-index: 1;
+            padding: 1.5rem 2rem;
+            background: rgba(5,15,30,0.8);
+            border-top: 1px solid var(--glass-border);
         }
-
-        /* Form error animation */
-        .error-message {
-            animation: shake 0.5s ease-in-out;
+        .footer-inner {
+            max-width: 900px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 0.75rem;
         }
-
-        /* Responsive Design */
-        @media (max-width: 900px) {
-            .sidebar {
-                width: 60px;
-            }
-
-            .sidebar a span {
-                display: none;
-            }
-
-            .main-content {
-                margin-left: 60px;
-            }
+        .footer-inner p {
+            font-size: 0.78rem; color: rgba(148,163,184,0.55);
         }
-
-        @media (max-width: 768px) {
-            .top-bar {
-                padding: 1rem;
-            }
-
-            .top-bar .logo {
-                font-size: 1.3rem;
-                left: 1rem;
-            }
-
-            .top-bar nav {
-                position: static;
-                margin-left: auto;
-                right: 1rem;
-            }
-
-            .main-content {
-                padding: 1rem;
-                margin-left: 60px;
-            }
-
-            .card {
-                margin: 1rem;
-                padding: 2rem 1.5rem;
-                border-radius: 20px;
-            }
-
-            .input-group {
-                margin-bottom: 1.2rem;
-            }
-
-            .input-icon {
-                padding: 0.9rem 1rem;
-                height: 55px;
-            }
-
-            .input-smooth {
-                padding: 1rem 1.2rem;
-                font-size: 1rem;
-            }
-
-            .btn-smooth {
-                font-size: 1.1rem;
-                padding: 1rem 0;
-            }
-
-            .register-link {
-                font-size: 1.1rem;
-                padding: 1rem 0;
-            }
+        .footer-inner p a { color: var(--blue-light); text-decoration:none; }
+        .footer-inner p a:hover { text-decoration:underline; }
+        .footer-links { display:flex; gap:1.25rem; }
+        .footer-links a {
+            font-size:0.78rem; color:rgba(148,163,184,0.55);
+            text-decoration:none; transition:color 0.2s ease;
         }
-
-        @media (max-width: 480px) {
-            .main-content {
-                margin-left: 0;
-                padding: 0.5rem;
-            }
-
-            .sidebar {
-                display: none;
-            }
-
-            .card {
-                margin: 0.5rem;
-                padding: 1.5rem 1rem;
-                max-width: 100%;
-            }
-
-            .top-bar .logo {
-                font-size: 1.2rem;
-            }
-
-            .input-smooth {
-                font-size: 0.95rem;
-            }
-
-            .btn-smooth,
-            .register-link {
-                font-size: 1rem;
-            }
-        }
+        .footer-links a:hover { color:var(--text-secondary); }
     </style>
 </head>
 
 <body>
-    <!-- Top Bar -->
-    <header class="top-bar">
-        <div class="logo">AuthenticityHub</div>
-    </header>
+    <div class="bg-mesh"></div>
+    <div class="bg-grid"></div>
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-nav">
-            <a href="{{ route('home') }}" class="sidebar-link">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="{{ route('home') }}" class="nav-brand">
+            <div class="nav-logo-icon">
+                <i class="fas fa-shield-halved"></i>
+            </div>
+            <div>
+                <span class="nav-brand-name">AuthenticityHub</span>
+                <span class="nav-brand-sub">MCMC Official Platform</span>
+            </div>
+        </a>
+        <a href="{{ route('home') }}" class="nav-link">
+            <i class="fas fa-arrow-left" style="margin-right:0.35rem;font-size:0.8rem;"></i> Back to Home
+        </a>
+    </nav>
 
+    <!-- MAIN -->
+    <div class="page-wrapper">
+        <div class="auth-card">
 
-            <a href="#" class="sidebar-link" onclick="toggleHelpPanel(event)">
-                <i class="fas fa-question-circle"></i>
-                <span>Help</span>
-            </a>
-        </div>
-    </aside>
-
-    <!-- Help Panel -->
-    <div id="helpPanel"
-        class="fixed right-0 top-0 h-full w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-[101] overflow-y-auto">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-semibold text-[#283d63]">Help Center</h2>
-                <button onclick="toggleHelpPanel()" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
+            <!-- Card Header -->
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <h1 class="card-title">Welcome Back</h1>
+                <p class="card-subtitle">Sign in to your AuthenticityHub account to continue</p>
             </div>
 
-            <div class="space-y-4">
-                <!-- Help Item 1 -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-gray-50 px-4 py-3 cursor-pointer flex justify-between items-center"
-                        onclick="toggleHelpContent('help1')">
-                        <h3 class="font-medium text-[#506a9f]">How to login to your account</h3>
-                        <i class="fas fa-chevron-down text-[#506a9f] transition-transform" id="help1Icon"></i>
+            {{-- Success message (e.g. after password reset) --}}
+            @if (session('success'))
+                <div class="alert alert-success">
+                    <i class="fas fa-circle-check"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            {{-- ======================================================
+                 LOGIN FORM
+                 Backend: POST {{ route('login') }}
+                 Controller: Module3\PublicUser\UserController@login
+            ====================================================== --}}
+            <form method="POST" action="{{ route('login') }}" novalidate id="loginForm">
+                @csrf
+
+                <!-- Email / Username -->
+                <div class="form-group">
+                    <label class="form-label" for="login">Email or Username</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-user input-icon-left"></i>
+                        <input
+                            type="text"
+                            id="login"
+                            name="login"
+                            value="{{ old('login') }}"
+                            placeholder="Enter your email or username"
+                            autocomplete="username"
+                            class="form-input @error('login') is-invalid @enderror"
+                            required
+                        />
                     </div>
-                    <div id="help1Content" class="px-4 py-3 bg-white hidden">
-                        <p class="text-gray-600">Enter your username or email address and password in the fields
-                            provided, then click the "Login" button. Make sure your caps lock is off as passwords are
-                            case-sensitive.</p>
-                    </div>
+                    @error('login')
+                        <div class="field-error">
+                            <i class="fas fa-triangle-exclamation"></i>
+                            <span>{{ $message }}</span>
+                        </div>
+                    @enderror
                 </div>
 
-                <!-- Help Item 2 -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-gray-50 px-4 py-3 cursor-pointer flex justify-between items-center"
-                        onclick="toggleHelpContent('help2')">
-                        <h3 class="font-medium text-[#506a9f]">I forgot my password</h3>
-                        <i class="fas fa-chevron-down text-[#506a9f] transition-transform" id="help2Icon"></i>
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-lock input-icon-left"></i>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            class="form-input @error('password') is-invalid @enderror"
+                            required
+                        />
+                        <button type="button" class="input-btn-right" id="togglePassword" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                        </button>
                     </div>
-                    <div id="help2Content" class="px-4 py-3 bg-white hidden">
-                        <p class="text-gray-600">Click on the "Forgot your password?" link below the login form. You'll
-                            be asked to enter your email address, and we'll send you instructions to reset your
-                            password.</p>
-                    </div>
+                    @error('password')
+                        <div class="field-error">
+                            <i class="fas fa-triangle-exclamation"></i>
+                            <span>{{ $message }}</span>
+                        </div>
+                    @enderror
                 </div>
 
-                <!-- Help Item 3 -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-gray-50 px-4 py-3 cursor-pointer flex justify-between items-center"
-                        onclick="toggleHelpContent('help3')">
-                        <h3 class="font-medium text-[#506a9f]">Creating a new account</h3>
-                        <i class="fas fa-chevron-down text-[#506a9f] transition-transform" id="help3Icon"></i>
-                    </div>
-                    <div id="help3Content" class="px-4 py-3 bg-white hidden">
-                        <p class="text-gray-600">Click the "Register" button at the bottom of the login page to create a
-                            new account. You'll need to provide a username, email address, and password.</p>
-                    </div>
+                <!-- Options row -->
+                <div class="form-options">
+                    <label class="remember-label">
+                        <input type="checkbox" name="remember" id="remember" value="1">
+                        Remember me
+                    </label>
+                    {{-- Link to password recovery --}}
+                    <a href="{{ route('password.recovery') }}" class="forgot-link">Forgot password?</a>
                 </div>
 
-                <!-- Help Item 4 -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-gray-50 px-4 py-3 cursor-pointer flex justify-between items-center"
-                        onclick="toggleHelpContent('help4')">
-                        <h3 class="font-medium text-[#506a9f]">Account security tips</h3>
-                        <i class="fas fa-chevron-down text-[#506a9f] transition-transform" id="help4Icon"></i>
-                    </div>
-                    <div id="help4Content" class="px-4 py-3 bg-white hidden">
-                        <p class="text-gray-600">
-                            - Use a strong, unique password<br>
-                            - Don't share your login credentials<br>
-                            - Log out when using shared computers<br>
-                            - Check that you're on the correct website before entering credentials
-                        </p>
-                    </div>
-                </div>
+                <!-- Submit -->
+                <button type="submit" class="btn-submit" id="loginSubmitBtn">
+                    <i class="fas fa-arrow-right-to-bracket"></i>
+                    Sign In
+                </button>
+            </form>
 
-                <!-- Help Item 5 -->
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <div class="bg-gray-50 px-4 py-3 cursor-pointer flex justify-between items-center"
-                        onclick="toggleHelpContent('help5')">
-                        <h3 class="font-medium text-[#506a9f]">Contact support</h3>
-                        <i class="fas fa-chevron-down text-[#506a9f] transition-transform" id="help5Icon"></i>
-                    </div>
-                    <div id="help5Content" class="px-4 py-3 bg-white hidden">
-                        <p class="text-gray-600">If you're still having trouble, please contact our support team at <a
-                                href="mailto:support@authenticityhub.com" class="text-blue-600 hover:underline">support@authenticityhub.com</a></p>
-                    </div>
-                </div>
+            {{-- ======================================================
+                 2FA / OTP NOTE
+                 After the user logs in with valid credentials, the
+                 backend (for admin users) redirects to:
+                 route('admin.otp.show') — see adminOTPVerifyPage.blade.php
+                 This info card is purely illustrative for public users.
+            ====================================================== --}}
+            <div style="
+                margin-top:1.25rem;
+                padding:0.85rem 1rem;
+                background:rgba(6,182,212,0.08);
+                border:1px solid rgba(6,182,212,0.2);
+                border-radius:10px;
+                display:flex; align-items:flex-start; gap:0.7rem;
+            ">
+                <i class="fas fa-shield-halved" style="color:var(--cyan);margin-top:0.1rem;flex-shrink:0;"></i>
+                <p style="font-size:0.8rem;color:rgba(148,163,184,0.85);line-height:1.55;">
+                    <strong style="color:var(--cyan);">Administrator accounts</strong> are protected with Two-Factor Authentication. You will be prompted for a One-Time Password after sign-in.
+                </p>
+            </div>
+
+            <div class="card-divider"><span>New to AuthenticityHub?</span></div>
+
+            <div class="register-prompt">
+                Don't have an account?
+                <a href="{{ route('register') }}" id="goRegisterLink">Create one for free &rarr;</a>
+            </div>
+
+            <div class="security-note">
+                <i class="fas fa-lock"></i>
+                Secured with 256-bit TLS encryption &amp; PDPA compliant
             </div>
         </div>
     </div>
 
-    <!-- Overlay for help panel -->
-    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[100] hidden" onclick="toggleHelpPanel()"></div>
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-inner">
+            <p>&copy; {{ date('Y') }} AuthenticityHub — <a href="https://www.mcmc.gov.my" target="_blank">MCMC Malaysia</a>. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Use</a>
+                <a href="{{ route('home') }}">Home</a>
+            </div>
+        </div>
+    </footer>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="card">
-            <h2 style="font-size: 2rem;"><b>Login</b></h2>
+    <script>
+        // Password visibility toggle
+        const toggleBtn = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('togglePasswordIcon');
 
-            @if (session('success'))
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>{{ session('success') }}
-                </div> @endif
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                toggleIcon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+            });
+        }
 
-            <form method="POST"
-                                action="{{ route('login') }}" novalidate>
-                                @csrf
+        // Login form submission — loading state
+        const loginForm = document.getElementById('loginForm');
+        const loginSubmitBtn = document.getElementById('loginSubmitBtn');
 
-                                <div class="input-group">
-                                    <span class="input-icon @error('login') is-invalid @enderror">
-                                        <i class="fas fa-user"></i>
-                                    </span>
-                                    <input type="text" id="login" name="login" value="{{ old('login') }}"
-                                        required class="input-smooth @error('login') is-invalid @enderror"
-                                        placeholder="Email or Username" />
-                                </div>
-                                @error('login')
-                                    <span class="error-message">{{ $message }}</span>
-                                @enderror
+        if (loginForm) {
+            // Restore form state on page show (back button)
+            window.addEventListener('pageshow', function(e) {
+                if (e.persisted) {
+                    loginSubmitBtn.disabled = false;
+                    loginSubmitBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In';
+                }
+            });
 
-                                <div class="input-group">
-                                    <span class="input-icon @error('password') is-invalid @enderror">
-                                        <i class="fas fa-lock"></i>
-                                    </span>
-                                    <input type="password" name="password" required
-                                        class="input-smooth @error('password') is-invalid @enderror"
-                                        placeholder="Password" />
-                                </div>
-                                @error('password')
-                                    <span class="error-message">{{ $message }}</span>
-                                @enderror
-
-                                <div style="margin-bottom:1rem;">
-                                    <a href="{{ route('password.recovery') }}" class="forgot-link">
-                                        Forgot your password?
-                                    </a>
-                                </div>
-
-                                <button type="submit" class="btn-smooth">Login</button>
-                                </form>
-
-                                <script>
-                                    document.addEventListener('DOMContentLoaded', function() {
-                                        const form = document.querySelector('form');
-                                        const submitBtn = form.querySelector('[type="submit"]');
-
-                                        // Reset button state on page load
-                                        submitBtn.innerHTML = 'Login';
-                                        submitBtn.style.pointerEvents = 'auto';
-
-                                        // Check if we should clear form (after successful login/logout)
-                                        const urlParams = new URLSearchParams(window.location.search);
-                                        const clearForm = urlParams.get('clear') === '1' ||
-                                                        sessionStorage.getItem('loginSuccess') === 'true' ||
-                                                        localStorage.getItem('shouldClearLogin') === 'true' ||
-                                                        @if (session('login_successful')) true @else false @endif;
-
-                                        if (clearForm) {
-                                            // Clear form and storage
-                                            form.querySelectorAll('input[name]').forEach(input => {
-                                                input.value = '';
-                                                localStorage.removeItem('loginPage.' + input.name);
-                                            });
-                                            sessionStorage.removeItem('loginSuccess');
-                                            localStorage.removeItem('shouldClearLogin');
-                                        } else {
-                                            // Only restore saved values if we're not clearing
-                                            form.querySelectorAll('input[name]').forEach(input => {
-                                                const key = 'loginPage.' + input.name;
-                                                const val = localStorage.getItem(key);
-                                                if (val !== null) input.value = val;
-                                            });
-                                        }
-
-                                        // Save on change
-                                        form.querySelectorAll('input[name]').forEach(input => {
-                                            input.addEventListener('input', () => {
-                                                const key = 'loginPage.' + input.name;
-                                                localStorage.setItem(key, input.value);
-                                            });
-                                        });
-
-                                        // Handle form submission
-                                        form.addEventListener('submit', (e) => {
-                                            if (!form.checkValidity()) return;
-
-                                            // Add submission animation
-                                            submitBtn.innerHTML = '<i class="fas
-                                fa-spinner fa-spin"></i> Logging in...';
-                                submitBtn.style.pointerEvents = 'none';
-
-                                // Mark that we're attempting login
-                                sessionStorage.setItem('loginAttempt', 'true');
-
-                                // Clear form data from localStorage on successful submission
-                                setTimeout(() => {
-                                form.querySelectorAll('input[name]').forEach(input => {
-                                localStorage.removeItem('loginPage.' + input.name);
-                                });
-                                }, 1000);
-                                });
-
-                                // Clear form data if the user navigates away and comes back
-                                window.addEventListener('pageshow', function(event) {
-                                if (event.persisted || window.performance.navigation.type === 2) {
-                                // User used back button or page was cached
-                                submitBtn.innerHTML = 'Login';
-                                submitBtn.style.pointerEvents = 'auto';
-                                }
-                                });
-
-                                // Add animation to error messages if present
-                                const errorMessages = document.querySelectorAll('.error-message');
-                                if (errorMessages.length > 0) {
-                                errorMessages.forEach(error => {
-                                error.style.display = 'none';
-                                setTimeout(() => {
-                                error.style.display = 'block';
-                                }, 500);
-                                });
-                                }
-                                });
-                                </script>
-
-                                <!-- Help Panel Functions - Global scope -->
-                                <script>
-                                    // Toggle help panel function
-                                    function toggleHelpPanel(event) {
-                                        if (event) {
-                                            event.preventDefault();
-                                        }
-
-                                        const helpPanel = document.getElementById('helpPanel');
-                                        const overlay = document.getElementById('overlay');
-
-                                        if (helpPanel.classList.contains('translate-x-full')) {
-                                            helpPanel.classList.remove('translate-x-full');
-                                            overlay.classList.remove('hidden');
-                                            document.body.style.overflow = 'hidden'; // Prevent scrolling
-                                        } else {
-                                            helpPanel.classList.add('translate-x-full');
-                                            overlay.classList.add('hidden');
-                                            document.body.style.overflow = ''; // Re-enable scrolling
-                                        }
-                                    }
-
-                                    // Toggle help content function
-                                    function toggleHelpContent(id) {
-                                        const content = document.getElementById(id + 'Content');
-                                        const icon = document.getElementById(id + 'Icon');
-
-                                        if (content.classList.contains('hidden')) {
-                                            content.classList.remove('hidden');
-                                            icon.classList.add('rotate-180');
-                                        } else {
-                                            content.classList.add('hidden');
-                                            icon.classList.remove('rotate-180');
-                                        }
-                                    }
-                                </script>
-
-                                <div style="text-align:center; margin-top:2rem;">
-                                    <div
-                                        style="color:#283d63; font-weight:600; margin-bottom:0.7rem; font-size:1.08rem;">
-                                        Don't have an account?
-                                    </div>
-                                    <a href="{{ route('register') }}" class="register-link">
-                                        Register
-                                    </a>
-                                </div>
-                    </div>
-                </div>
+            loginForm.addEventListener('submit', function() {
+                loginSubmitBtn.disabled = true;
+                loginSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In…';
+            });
+        }
+    </script>
 </body>
-
 </html>
