@@ -13,11 +13,49 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // PublicUser::factory(10)->create();
+        \App\Models\PublicUser::updateOrCreate(
+            ['UserEmail' => 'publicuser@gmail.com'],
+            [
+                'UserName' => 'public',
+                'UserPassword' => \Illuminate\Support\Facades\Hash::make('password123'),
+                'UserPhoneNum' => '1234567890',
+            ]
+        );
 
-        PublicUser::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        \App\Models\Admin::updateOrCreate(
+            ['AdminEmail' => 'khsledqmhan@gmail.com'],
+            [
+                'AdminName' => 'admin',
+                'AdminUserName' => 'admin',
+                'AdminPassword' => \Illuminate\Support\Facades\Hash::make('password123'),
+                'AdminRole' => 'Super Admin',
+                'AdminPhoneNum' => '1234567890',
+                'AdminAddress' => 'Default Address',
+            ]
+        );
+        
+
+        \App\Models\Admin::updateOrCreate(
+            ['AdminEmail' => 'abu.hd3@gmail.com'],
+            [
+                'AdminName' => 'admin2',
+                'AdminUserName' => 'admin2',
+                'AdminPassword' => \Illuminate\Support\Facades\Hash::make('password123'),
+                'AdminRole' => 'Super Admin',
+                'AdminPhoneNum' => '1234567890',
+                'AdminAddress' => 'Default Address',
+            ]
+        );
+        
+        \App\Models\Agency::updateOrCreate(
+            ['AgencyEmail' => 'agency@gmail.com'],
+            [
+                'AgencyName' => 'agency',
+                'AgencyUserName' => 'agency',
+                'AgencyPassword' => \Illuminate\Support\Facades\Hash::make('password123'),
+                'AgencyType' => 'General',
+                'AgencyPhoneNum' => '1234567890',
+            ]
+        );
     }
 }
