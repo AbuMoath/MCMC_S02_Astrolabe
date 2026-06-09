@@ -353,11 +353,7 @@
     <!-- Top Bar -->
     <div class="top-bar">
         <div class="logo">AuthenticityHub</div>
-        <div class="user-info-topbar">
-            <div class="welcome">
-                Welcome<br>{{ DB::table('administrators')->first()->AdminName ?? 'Administrator' }}
-            </div>
-        </div>
+        @include('partials.user_area')
     </div>
 
     <div class="main-container">

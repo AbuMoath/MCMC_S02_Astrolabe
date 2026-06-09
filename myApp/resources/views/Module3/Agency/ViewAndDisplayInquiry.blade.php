@@ -12,32 +12,38 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: #F7F3EA;
+            background: linear-gradient(135deg, #f5f1e8 0%, #ede7d9 50%, #f0ebe1 100%);
+            background-attachment: fixed;
             margin: 0;
             padding: 0;
         }
 
-        /* Top Bar Styling - Dark brown/gray as in the profile page */
         .top-bar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 56px;
-            background: #6B6860;
+            height: 64px;
+            background: linear-gradient(135deg, #4a4237 0%, #6b6860 50%, #5d5449 100%);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 2rem;
             z-index: 100;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
         }
 
         .top-bar .logo {
-            font-weight: 700;
-            font-size: 1.3rem;
+            font-weight: 800;
+            font-size: 1.4rem;
             color: #ffffff;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #ffffff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .search-bar {
@@ -67,6 +73,16 @@
             align-items: center;
             gap: 12px;
             color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .user-area:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
         }
 
         .user-area .welcome {
@@ -95,71 +111,101 @@
         /* Sidebar Styling - Standardized Design */
         .sidebar {
             position: fixed;
-            top: 56px;
+            top: 64px;
             left: 0;
-            width: 14rem;
-            height: calc(100vh - 56px);
-            background: #EAEAEA;
-            border-top-right-radius: 1.5rem;
-            border-bottom-right-radius: 1.5rem;
-            box-shadow: 0 4px 15px rgba(40, 61, 99, 0.1);
+            width: 16rem;
+            height: calc(100vh - 64px);
+            background: linear-gradient(180deg, #ffffff 0%, #f8f7f4 100%);
+            border-top-right-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), inset -1px 0 0 rgba(255, 255, 255, 0.5);
             display: flex;
             flex-direction: column;
             padding: 2rem 0;
             z-index: 99;
+            backdrop-filter: blur(10px);
         }
 
         .sidebar-nav {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            padding: 0 1rem;
+            gap: 8px;
+            padding: 0 1.5rem;
             flex: 1;
         }
 
         .sidebar-link {
             display: flex;
             align-items: center;
-            gap: 0.7rem;
-            padding: 0.75rem 1rem;
-            color: #333333;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #4a4237;
             text-decoration: none;
             font-weight: 500;
-            border-radius: 0.75rem;
-            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 89, 90, 0.1), transparent);
+            transition: left 0.5s ease;
         }
 
         .sidebar-link:hover {
             color: #FF595A;
-            transform: translateX(4px);
+            background: rgba(255, 89, 90, 0.08);
+            transform: translateX(8px);
+            box-shadow: 0 4px 12px rgba(255, 89, 90, 0.2);
+        }
+
+        .sidebar-link:hover::before {
+            left: 100%;
         }
 
         .sidebar-link.active {
             color: #FF595A;
+            background: rgba(255, 89, 90, 0.12);
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(255, 89, 90, 0.25);
         }
 
         .sidebar-link i {
-            width: 1.2rem;
+            width: 20px;
             text-align: center;
+            font-size: 1.1rem;
         }
 
         .logout-link {
             margin-top: auto;
             margin-bottom: 1rem;
             color: #e74c3c !important;
+            background: rgba(231, 76, 60, 0.08) !important;
+            border: 1px solid rgba(231, 76, 60, 0.2);
         }
 
         .logout-link:hover {
             color: #c0392b !important;
+            background: rgba(231, 76, 60, 0.15) !important;
+            border-color: rgba(231, 76, 60, 0.3);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
         }
 
         /* Content Area */
         .content-area {
-            margin-left: 14rem;
-            margin-top: 56px;
+            margin-left: 16rem;
+            margin-top: 64px;
             padding: 30px;
-            background: #F7F3EA;
-            min-height: calc(100vh - 56px);
+            background: transparent;
+            min-height: calc(100vh - 64px);
         }
 
         /* Content Container */
@@ -520,39 +566,12 @@
 <body> <!-- Top Bar -->
     <header class="top-bar">
         <div class="logo">AuthenticityHub</div>
-        <div class="search-bar">
-            <input type="text" placeholder="Search inquiries..." id="mainSearchInput" />
-        </div>
-        <div class="user-area">
-            <div class="welcome">
-                <div>{{ $agency->AgencyName ?? 'Agency' }}</div>
-                <div style="font-size: 0.75rem; opacity: 0.8;">Welcome</div>
-            </div>
-            <div class="profile-pic-container">
-                @if (isset($agency->AgencyProfilePicture) && $agency->AgencyProfilePicture)
-                    <img src="{{ asset('storage/' . $agency->AgencyProfilePicture) }}" alt="Profile Picture">
-                @else
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($agency->AgencyName ?? 'Agency') }}&background=eeeeee&color=666666"
-                        alt="Profile Picture">
-                @endif
-            </div>
-        </div>
+
+        @include('partials.user_area')
     </header>
 
     <!-- Sidebar -->
-    <aside class="sidebar">
-        <nav class="sidebar-nav">
-            <a href="{{ route('agency.home') }}" class="sidebar-link"><i class="fas fa-home"></i> <span>Home</span></a>
-            <a href="{{ route('agency.profile') }}" class="sidebar-link"><i class="fas fa-cog"></i>
-                <span>Profile</span></a>
-            <a href="{{ route('agency.security') }}" class="sidebar-link"><i class="fas fa-shield-alt"></i>
-                <span>Security</span></a>
-            <a href="#" class="sidebar-link active"><i class="far fa-clipboard"></i> <span>Display and
-                    Approved</span></a>
-            <a href="{{ route('login') }}" class="sidebar-link logout-link"><i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span></a>
-        </nav>
-    </aside>
+    @include('Module3.Agency.partials.sidebar')
 
     <!-- Main Content -->
     <div class="content-area">
@@ -602,8 +621,8 @@
                             </div>
                             <div>
                                 <div style="font-size: 1.5rem; font-weight: 700; color: #1f2937;">
-                                    {{ $statusCounts['under_investigation'] ?? 0 }}</div>
-                                <div style="color: #6b7280; font-size: 0.875rem;">Under Review</div>
+                                    {{ $statusCounts['pending'] ?? 0 }}</div>
+                                <div style="color: #6b7280; font-size: 0.875rem;">Pending</div>
                             </div>
                         </div>
                     </div>
@@ -749,6 +768,10 @@
                                     </button>
 
                                     @if ($inquiry->InquiryStatus === 'Pending' || $inquiry->InquiryStatus === 'Under Investigation')
+                                        <button onclick="updateStatusModal({{ $inquiry->InquiryID }})" class="btn btn-success">
+                                            <i class="fas fa-sync-alt"></i>
+                                            Update Status
+                                        </button>
                                         <button onclick="rejectInquiry({{ $inquiry->InquiryID }})"
                                             class="btn btn-danger">
                                             <i class="fas fa-times"></i>
@@ -832,6 +855,45 @@
                 </div>
             </div>
 
+            <!-- Status Update Modal -->
+            <div id="statusModal" class="modal hidden">
+                <div class="modal-content" style="width: 500px;">
+                    <div class="modal-header">
+                        <h2 style="font-size: 1.25rem; font-weight: 600; color: #1f2937;">Update Inquiry Status</h2>
+                    </div>
+                    <div class="modal-body">
+                        <p style="color: #6b7280; margin-bottom: 1rem;">
+                            Update the status of this inquiry. The status change will be visible to the user who submitted it.
+                        </p>
+                        <form id="statusForm">
+                            <input type="hidden" id="statusInquiryId" name="inquiry_id">
+                            <div class="form-group">
+                                <label class="form-label">New Status <span style="color: #ef4444;">*</span></label>
+                                <select id="statusSelect" name="status" class="form-input" required>
+                                    <option value="">Select a status...</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Under Investigation">Under Investigation</option>
+                                    <option value="Verified as True">Verified</option>
+                                    <option value="Identified as Fake">Rejected (Fake)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Comments</label>
+                                <textarea id="statusComments" name="comments" rows="3" class="form-textarea"
+                                    placeholder="Add any notes about this status change..."></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button onclick="closeModal('statusModal')" class="btn btn-secondary">Cancel</button>
+                        <button onclick="submitStatusUpdate()" class="btn btn-success">
+                            <i class="fas fa-check"></i>
+                            Update Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <script>
                 let allInquiries = @json($inquiries ?? []);
                 const storageUrl = "{{ asset('storage') }}";
@@ -867,20 +929,31 @@
                             evidenceFiles = [inquiry.InquiryEvidence];
                         }
 
-                        evidenceHtml = evidenceFiles.map(file => `
-                    <div class="evidence-item">
-                        <div class="evidence-icon">
-                            <i class="fas fa-file"></i>
+                        evidenceHtml = evidenceFiles.map(file => {
+                            const fileName = file.split('/').pop();
+                            const ext = fileName.split('.').pop().toLowerCase();
+                            let previewHtml = '';
+                            if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+                                previewHtml = `<img src="${storageUrl}/${file}" style="max-width: 200px; max-height: 150px; border-radius: 8px; margin-top: 0.5rem; cursor: pointer;" onclick="window.open('${storageUrl}/${file}', '_blank')">`;
+                            }
+                            return `
+                        <div class="evidence-item">
+                            <div class="evidence-icon">
+                                <i class="fas ${['pdf'].includes(ext) ? 'fa-file-pdf' : 'fa-file-image'}"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500;">${fileName}</div>
+                                <div style="font-size: 0.875rem; color: #6b7280;">Evidence File (${ext.toUpperCase()})</div>
+                                ${previewHtml}
+                            </div>
+                            <a href="${storageUrl}/${file}" target="_blank" class="btn btn-primary" style="padding: 0.5rem; margin-right: 0.5rem;">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a href="${storageUrl}/${file}" class="btn btn-success" style="padding: 0.5rem;" download>
+                                <i class="fas fa-download"></i> Download
+                            </a>
                         </div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 500;">${file}</div>
-                            <div style="font-size: 0.875rem; color: #6b7280;">Evidence File</div>
-                        </div>
-                        <a href="${storageUrl}/${file}" target="_blank" class="btn btn-primary" style="padding: 0.5rem;" download>
-                            <i class="fas fa-download"></i>
-                        </a>
-                    </div>
-                `).join('');
+                    `}).join('');
                     }
 
                     const detailsHtml = `
@@ -1040,6 +1113,63 @@
                         .catch(error => {
                             console.error('Error:', error);
                             alert('An error occurred while rejecting the inquiry: ' + error.message);
+                        });
+                }
+
+                // Update Status Modal
+                function updateStatusModal(inquiryId) {
+                    document.getElementById('statusInquiryId').value = inquiryId;
+                    document.getElementById('statusSelect').value = '';
+                    document.getElementById('statusComments').value = '';
+                    showModal('statusModal');
+                }
+
+                function submitStatusUpdate() {
+                    const inquiryId = document.getElementById('statusInquiryId').value;
+                    const status = document.getElementById('statusSelect').value;
+                    const comments = document.getElementById('statusComments').value;
+
+                    if (!status) {
+                        alert('Please select a status');
+                        return;
+                    }
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                    if (!csrfToken) {
+                        alert('Security token not found. Please refresh the page.');
+                        return;
+                    }
+
+                    fetch(`/agency/inquiry/${inquiryId}/update-status`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                status: status,
+                                comments: comments
+                            })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                alert('Status updated successfully!');
+                                closeModal('statusModal');
+                                location.reload();
+                            } else {
+                                alert('Error: ' + (data.message || 'Failed to update status'));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred: ' + error.message);
                         });
                 }
 

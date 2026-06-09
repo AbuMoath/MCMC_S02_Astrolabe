@@ -551,17 +551,8 @@
     <!-- Top Bar -->
     <header class="top-bar">
         <div class="logo">AuthenticityHub</div>
-        <div class="search-container">
-            <input type="text" placeholder="Search...">
-        </div>
-        <div class="user-info-topbar">
-            <div class="welcome">
-                Welcome<br>{{ DB::table('administrators')->first()->AdminName ?? 'Admin' }}
-            </div>
-            <div class="user-icon">
-                <i class="fas fa-user-circle"></i>
-            </div>
-        </div>
+
+        @include('partials.user_area')
     </header>
 
     <!-- Sidebar -->
@@ -612,11 +603,6 @@
                 <i class="fas fa-eye"></i>
                 <h3>View Submitted</h3>
                 <p>View all submitted inquiries with their current status and assigned agencies.</p>
-            </div>
-            <div class="icon-card" onclick="showPage('notesPage')">
-                <i class="fas fa-sticky-note"></i>
-                <h3>Assignment Notes</h3>
-                <p>Add notes and instructions to guide agencies when assigning inquiries for investigation.</p>
             </div>
         </div>
 

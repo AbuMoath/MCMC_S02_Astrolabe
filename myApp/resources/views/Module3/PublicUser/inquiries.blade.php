@@ -54,20 +54,12 @@
             font-weight: 500;
         }
 
-        .status-pending {
-            background: #fff3dc;
-            color: #b25e09;
-        }
-
-        .status-resolved {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .status-progress {
-            background: #dbeafe;
-            color: #1e40af;
-        }
+        .status-warning { background: #fff3dc; color: #b25e09; }
+        .status-info { background: #dbeafe; color: #1e40af; }
+        .status-success { background: #dcfce7; color: #15803d; }
+        .status-danger { background: #fee2e2; color: #b91c1c; }
+        .status-primary { background: #e0e7ff; color: #3730a3; }
+        .status-secondary { background: #f3f4f6; color: #374151; }
 
         .details-button {
             background: linear-gradient(145deg, #d1d9f0, #a6b1d7);
@@ -327,24 +319,7 @@
     <header class="top-bar">
         <div class="logo">AuthenticityHub</div>
 
-        <div class="user-info-topbar">
-            @auth
-                <div class="user-pic">
-                    @if (Auth::user()->UserProfilePicture)
-                        <img src="{{ asset('storage/' . Auth::user()->UserProfilePicture) }}" alt="Profile Picture">
-                    @else
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->UserName) }}&background=cccccc&color=555555"
-                            alt="Profile Picture">
-                    @endif
-                </div>
-                <div class="user-name">{{ Auth::user()->UserName }}</div>
-            @else
-                <div class="user-pic">
-                    <img src="https://ui-avatars.com/api/?name=Guest&background=cccccc&color=555555" alt="Profile Picture">
-                </div>
-                <div class="user-name">Guest</div>
-            @endauth
-        </div>
+        @include('partials.user_area')
     </header>
 
     <!-- Sidebar -->
@@ -383,7 +358,18 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="inquiry-list">
-            <h2 class="text-2xl font-semibold text-[#283d63] mb-6">Inquiry List</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-[#283d63]">Inquiry List</h2>
+                @if ($userInquiries->count() > 0)
+                    <form action="{{ route('inquiries.destroyAll') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete ALL your inquiries? This cannot be undone.');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn-secondary" style="background: #dc2626; padding: 0.5rem 1rem;">
+                            <i class="fas fa-trash-alt"></i> Delete All My Inquiries
+                        </button>
+                    </form>
+                @endif
+            </div>
 
             @if (session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
@@ -423,7 +409,7 @@
                                 <td>{{ $inquiry->InquirySendDate ? $inquiry->InquirySendDate->format('Y-m-d') : 'N/A' }}
                                 </td>
                                 <td>
-                                    <span class="status-badge status-{{ strtolower($inquiry->InquiryStatus) }}">
+                                    <span class="status-badge status-{{ $inquiry->status_color }}">
                                         {{ $inquiry->InquiryStatus }}
                                     </span>
                                 </td>
@@ -447,10 +433,19 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('inquiries.show', $inquiry->InquiryID) }}"
-                                        class="details-button">
-                                        Details
-                                    </a>
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('inquiries.show', $inquiry->InquiryID) }}"
+                                            class="details-button">
+                                            Details
+                                        </a>
+                                        <form action="{{ route('inquiries.destroy', $inquiry->InquiryID) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this inquiry?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-secondary" style="background: #dc2626; padding: 0.5rem 1rem;">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -460,20 +455,32 @@
                         <tr>
                             <td>{{ $inquiry->InquiryID }}</td>
                             <td>{{ $inquiry->InquiryTitle }}</td>
-                            <td>{{ $inquiry->InquirySendDate ? $inquiry->InquirySendDate->format('Y-m-d') : 'N/A' }}
-                            </td>
+                            <td>{{ $inquiry->InquirySendDate ? $inquiry->InquirySendDate->format('Y-m-d') : 'N/A' }}</td>
                             <td>
-                                <span class="status-badge status-{{ strtolower($inquiry->InquiryStatus) }}">
+                                <span class="status-badge status-{{ $inquiry->status_color }}">
                                     {{ $inquiry->InquiryStatus }}
                                 </span>
                             </td>
                             <td>
-                                <a href="{{ route('inquiries.show', $inquiry->InquiryID) }}" class="details-button">
-                                    Details
-                                </a>
+                                @if($inquiry->agency)
+                                    <span class="text-sm font-medium">{{ $inquiry->agency->AgencyName }}</span>
+                                @else
+                                    <span class="text-gray-400 text-sm">Not Assigned</span>
+                                @endif
                             </td>
-                                    Details
-                                </a>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('inquiries.show', $inquiry->InquiryID) }}" class="details-button">
+                                        Details
+                                    </a>
+                                    <form action="{{ route('inquiries.destroy', $inquiry->InquiryID) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this inquiry?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-secondary" style="background: #dc2626; padding: 0.5rem 1rem;">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

@@ -537,20 +537,7 @@
         <div class="search-bar">
             <input type="text" placeholder="Search inquiries..." id="mainSearchInput" />
         </div>
-        <div class="user-area">
-            <div class="welcome">
-                <div>{{ $agency->AgencyName ?? 'Agency' }}</div>
-                <div style="font-size: 0.75rem; opacity: 0.8;">Welcome</div>
-            </div>
-            <div class="profile-pic-container">
-                @if (isset($agency->AgencyProfilePicture) && $agency->AgencyProfilePicture)
-                    <img src="{{ asset('storage/' . $agency->AgencyProfilePicture) }}" alt="Profile Picture">
-                @else
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($agency->AgencyName ?? 'Agency') }}&background=eeeeee&color=666666"
-                        alt="Profile Picture">
-                @endif
-            </div>
-        </div>
+        @include('partials.user_area')
     </header>
 
     <!-- Sidebar -->

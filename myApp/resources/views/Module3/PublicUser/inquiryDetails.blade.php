@@ -58,20 +58,12 @@
             display: inline-block;
         }
 
-        .status-pending {
-            background: #fff3dc;
-            color: #b25e09;
-        }
-
-        .status-resolved {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .status-progress {
-            background: #dbeafe;
-            color: #1e40af;
-        }
+        .status-warning { background: #fff3dc; color: #b25e09; }
+        .status-info { background: #dbeafe; color: #1e40af; }
+        .status-success { background: #dcfce7; color: #15803d; }
+        .status-danger { background: #fee2e2; color: #b91c1c; }
+        .status-primary { background: #e0e7ff; color: #3730a3; }
+        .status-secondary { background: #f3f4f6; color: #374151; }
 
         /* Top Bar Styling */
         .top-bar {
@@ -291,24 +283,7 @@
     <header class="top-bar">
         <div class="logo">AuthenticityHub</div>
 
-        <div class="user-info-topbar">
-            @auth
-                <div class="user-pic">
-                    @if (Auth::user()->UserProfilePicture)
-                        <img src="{{ asset('storage/' . Auth::user()->UserProfilePicture) }}" alt="Profile Picture">
-                    @else
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->UserName) }}&background=cccccc&color=555555"
-                            alt="Profile Picture">
-                    @endif
-                </div>
-                <div class="user-name">{{ Auth::user()->UserName }}</div>
-            @else
-                <div class="user-pic">
-                    <img src="https://ui-avatars.com/api/?name=Guest&background=cccccc&color=555555" alt="Profile Picture">
-                </div>
-                <div class="user-name">Guest</div>
-            @endauth
-        </div>
+        @include('partials.user_area')
     </header>
 
     <!-- Sidebar -->
@@ -415,7 +390,7 @@
 
                 <div class="detail-group">
                     <div class="detail-label">Status</div>
-                    <div class="status-badge status-{{ strtolower($inquiry->InquiryStatus) }}">
+                    <div class="status-badge status-{{ $inquiry->status_color }}">
                         {{ $inquiry->InquiryStatus }}
                     </div>
                 </div>
@@ -500,7 +475,14 @@
                     </div>
                 </div>
 
-                @if ($inquiry->VerificationDescription)
+                @if ($inquiry->StatusComments)
+                    <div class="detail-group">
+                        <div class="detail-label">Agency Notes</div>
+                        <div class="detail-value">{{ $inquiry->StatusComments }}</div>
+                    </div>
+                @endif
+                
+                @if ($inquiry->VerificationDescription && $inquiry->VerificationDescription !== $inquiry->StatusComments)
                     <div class="detail-group">
                         <div class="detail-label">Verification Notes</div>
                         <div class="detail-value">{{ $inquiry->VerificationDescription }}</div>

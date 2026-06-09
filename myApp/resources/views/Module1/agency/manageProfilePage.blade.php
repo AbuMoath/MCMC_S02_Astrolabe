@@ -604,23 +604,7 @@
     <!-- Top Bar -->
     <header class="top-bar">
         <div class="logo">AuthenticityHub</div>
-        <div class="user-area">
-            <div class="welcome">
-                <div>{{ $agency->AgencyName }}</div>
-                <div style="font-size: 0.75rem; opacity: 0.8;">Welcome</div>
-            </div>
-            <!-- Profile picture in top bar that opens file upload when clicked -->
-            <label for="AgencyProfilePicture" class="profile-pic-container">
-                @if ($agency->AgencyProfilePicture)
-                    <img id="profilePicPreview" src="{{ asset('storage/' . $agency->AgencyProfilePicture) }}"
-                        alt="Profile Picture">
-                @else
-                    <img id="profilePicPreview"
-                        src="https://ui-avatars.com/api/?name={{ urlencode($agency->AgencyName) }}&background=eeeeee&color=666666"
-                        alt="Profile Picture">
-                @endif
-            </label>
-        </div>
+        @include('partials.user_area')
     </header>
 
     <!-- Sidebar -->

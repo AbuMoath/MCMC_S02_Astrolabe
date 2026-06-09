@@ -1,0 +1,2 @@
+<?php echo $__env->make('Module3.PublicUser.inquiries', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php /**PATH C:\xampp\htdocs\SPM\MCMC_S02_Astrolabe\myApp\resources\views/publicUser/inquiries.blade.php ENDPATH**/ ?>

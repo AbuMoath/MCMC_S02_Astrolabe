@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\InquiryNotificationService;
 
 class AdminController extends Controller
 {
@@ -41,7 +42,7 @@ class AdminController extends Controller
 
         // Get recent inquiries for activity feed
         $recentActivities = Inquiry::with('agency')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->limit(5)
             ->get();
 
@@ -488,13 +489,13 @@ class AdminController extends Controller
             $assignedCount = 0;
 
             foreach ($request->inquiry_ids as $inquiryId) {
-                $inquiry = Inquiry::find($inquiryId);
+                $inquiry = Inquiry::with('user')->find($inquiryId);
                 if ($inquiry && !$inquiry->AgencyID) {
                     $inquiry->AgencyID = $request->agency_id;
                     
                     // Add admin comments if provided
                     if ($request->admin_comments) {
-                        $inquiry->AdminNotes = $request->admin_comments;
+                        $inquiry->admin_comments = $request->admin_comments;
                     }
                     
                     // Add priority level if provided
@@ -503,6 +504,13 @@ class AdminController extends Controller
                     }
                     
                     $inquiry->save();
+
+                    InquiryNotificationService::notifyAssignment(
+                        $inquiry,
+                        $agency,
+                        session('admin_name', 'Administrator')
+                    );
+
                     $assignedCount++;
                 }
             }
@@ -536,13 +544,13 @@ class AdminController extends Controller
             $assignedCount = 0;
 
             foreach ($request->inquiry_ids as $inquiryId) {
-                $inquiry = Inquiry::find($inquiryId);
+                $inquiry = Inquiry::with('user')->find($inquiryId);
                 if ($inquiry && !$inquiry->AgencyID) {
                     $inquiry->AgencyID = $request->agency_id;
                     
                     // Add detailed assignment notes
                     if ($request->assignment_notes) {
-                        $inquiry->AdminNotes = $request->assignment_notes;
+                        $inquiry->admin_comments = $request->assignment_notes;
                     }
                     
                     // Set priority level
@@ -552,10 +560,17 @@ class AdminController extends Controller
                     
                     // Set expected completion date if provided
                     if ($request->expected_completion) {
-                        $inquiry->ExpectedCompletion = $request->expected_completion;
+                        $inquiry->expected_completion_date = $request->expected_completion;
                     }
                     
                     $inquiry->save();
+
+                    InquiryNotificationService::notifyAssignment(
+                        $inquiry,
+                        $agency,
+                        session('admin_name', 'Administrator')
+                    );
+
                     $assignedCount++;
                 }
             }

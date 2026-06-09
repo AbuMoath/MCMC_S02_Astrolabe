@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Module3\Inquiry;
 use App\Models\Module3\Agency;
 use Illuminate\Support\Facades\Auth;
+use App\Services\InquiryNotificationService;
 
 class AgencyReviewAndNotificationController extends Controller
 {
@@ -132,6 +133,10 @@ class AgencyReviewAndNotificationController extends Controller
             $inquiry->StatusComments = $request->reason . ' - ' . $request->comments;
             $inquiry->save();
 
+            if ($inquiry->UserID) {
+                InquiryNotificationService::notifyPublicUserOfAgencyUpdate($inquiry, $agency);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Inquiry rejected successfully!',
@@ -175,8 +180,12 @@ class AgencyReviewAndNotificationController extends Controller
 
         // Update inquiry status
         $inquiry->InquiryStatus = 'Under Investigation';
-        $inquiry->AgencyComments = $request->comments;
+        $inquiry->StatusComments = $request->comments;
         $inquiry->save();
+
+        if ($inquiry->UserID) {
+            InquiryNotificationService::notifyPublicUserOfAgencyUpdate($inquiry, $agency);
+        }
 
         return response()->json([
             'success' => true,
@@ -210,16 +219,21 @@ class AgencyReviewAndNotificationController extends Controller
 
         // Validate input
         $request->validate([
-            'status' => 'required|in:Under Investigation,Verified as True,Identified as Fake,Completed',
+            'status' => 'required|in:Pending,Under Investigation,Verified as True,Identified as Fake,Completed',
             'comments' => 'nullable|string|max:1000',
         ]);
 
         // Update inquiry
         $inquiry->InquiryStatus = $request->status;
         if ($request->comments) {
-            $inquiry->AgencyComments = $request->comments;
+            $inquiry->StatusComments = $request->comments;
+            $inquiry->VerificationDescription = $request->comments;
         }
         $inquiry->save();
+
+        if ($inquiry->UserID) {
+            InquiryNotificationService::notifyPublicUserOfAgencyUpdate($inquiry, $agency);
+        }
 
         return response()->json([
             'success' => true,

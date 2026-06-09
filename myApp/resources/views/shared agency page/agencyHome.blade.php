@@ -577,20 +577,7 @@
     <!-- Top Bar -->
     <header class="top-bar">
         <div class="logo">AuthenticityHub</div>
-        <div class="user-area">
-            <div class="welcome">
-                <div>{{ $agency->AgencyName ?? 'Agency' }}</div>
-                <div style="font-size: 0.75rem; opacity: 0.8;">Welcome Back</div>
-            </div>
-            <div class="profile-pic-container">
-                @if (isset($agency) && $agency->AgencyProfilePicture)
-                    <img src="{{ asset('storage/' . $agency->AgencyProfilePicture) }}" alt="Profile Picture">
-                @else
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($agency->AgencyName ?? 'Agency') }}&background=eeeeee&color=666666"
-                        alt="Profile Picture">
-                @endif
-            </div>
-        </div>
+        @include('partials.user_area')
     </header>
 
     <!-- Sidebar -->

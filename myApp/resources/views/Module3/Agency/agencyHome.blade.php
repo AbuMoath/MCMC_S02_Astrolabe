@@ -577,36 +577,11 @@
     <!-- Top Bar -->
     <header class="top-bar">
         <div class="logo">AuthenticityHub</div>
-        <div class="user-area">
-            <div class="welcome">
-                <div>{{ $agency->AgencyName ?? 'Agency' }}</div>
-                <div style="font-size: 0.75rem; opacity: 0.8;">Welcome Back</div>
-            </div>
-            <div class="profile-pic-container">
-                @if (isset($agency) && $agency->AgencyProfilePicture)
-                    <img src="{{ asset('storage/' . $agency->AgencyProfilePicture) }}" alt="Profile Picture">
-                @else
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($agency->AgencyName ?? 'Agency') }}&background=eeeeee&color=666666"
-                        alt="Profile Picture">
-                @endif
-            </div>
-        </div>
+        @include('partials.user_area')
     </header>
 
     <!-- Sidebar -->
-    <aside class="sidebar">
-        <nav class="sidebar-nav">
-            <a href="#" class="sidebar-link active"><i class="fas fa-home"></i> <span>Home</span></a>
-            <a href="{{ route('agency.profile') }}" class="sidebar-link"><i class="fas fa-cog"></i>
-                <span>Profile</span></a>
-            <a href="{{ route('agency.security') }}" class="sidebar-link"><i class="fas fa-shield-alt"></i>
-                <span>Security</span></a>
-            <a href="{{ route('agency.view.display.inquiry') }}" class="sidebar-link"><i class="far fa-clipboard"></i>
-                <span>Display and Approved</span></a>
-            <a href="{{ route('login') }}" class="sidebar-link logout-link"><i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span></a>
-        </nav>
-    </aside>
+    @include('Module3.Agency.partials.sidebar')
 
     <!-- Main Content -->
     <div class="content-area">

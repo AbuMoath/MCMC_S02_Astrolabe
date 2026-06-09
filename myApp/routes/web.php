@@ -14,13 +14,11 @@ use App\Http\Controllers\Module3\Agency\AgencyController as Module3AgencyControl
 use App\Http\Controllers\Module3\Agency\AgencyReviewAndNotificationController as Module3AgencyReviewController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
-use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\Module4\NotificationController;
+use App\Http\Controllers\Module4\NotificationController as Module4NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\AgencyReviewAndNotificationController;
 
 // Home page
 Route::get('/', function () {
@@ -100,10 +98,20 @@ Route::get('/inquiries/{id}', [Module3InquiryController::class, 'show'])
     ->middleware(['web', 'auth'])
     ->name('inquiries.show');
 
+Route::delete('/inquiries/all', [Module3InquiryController::class, 'destroyAll'])
+    ->middleware(['web', 'auth'])
+    ->name('inquiries.destroyAll');
+
+Route::delete('/inquiries/{id}', [Module3InquiryController::class, 'destroy'])
+    ->middleware(['web', 'auth'])
+    ->name('inquiries.destroy');
+
 // Notifications route
-Route::get('/notifications', [InquiryController::class, 'notifications'])
+Route::get('/notifications', [Module4NotificationController::class, 'publicNotifications'])
     ->middleware('web')
     ->name('notifications');
+Route::post('/notifications/mark-all-read', [Module4NotificationController::class, 'markAllAsRead'])
+    ->name('notifications.markAllRead');
 
 // Test route for login validation
 Route::get('/test/login', function () {
@@ -204,57 +212,64 @@ Route::get('/agency/view-display-inquiry', [Module3AgencyReviewController::class
 Route::get('/agency/inquiry/{id}', [Module3AgencyReviewController::class, 'showInquiryDetails'])->name('agency.inquiry.details');
 
 // Agency inquiry reject route
-Route::post('/agency/inquiry/{id}/reject', [AgencyReviewAndNotificationController::class, 'rejectInquiry'])->name('agency.inquiry.reject');
+Route::post('/agency/inquiry/{id}/reject', [Module3AgencyReviewController::class, 'rejectInquiry'])->name('agency.inquiry.reject');
 
 // Agency inquiry status update route
-Route::post('/agency/inquiry/{id}/update-status', [AgencyReviewAndNotificationController::class, 'updateInquiryStatus'])->name('agency.inquiry.update.status');
+Route::post('/agency/inquiry/{id}/update-status', [Module3AgencyReviewController::class, 'updateInquiryStatus'])->name('agency.inquiry.update.status');
 
 // Agency add notes route
-Route::post('/agency/inquiry/{id}/add-notes', [AgencyReviewAndNotificationController::class, 'addInquiryNotes'])->name('agency.inquiry.add.notes');
+Route::post('/agency/inquiry/{id}/add-notes', [Module3AgencyReviewController::class, 'addInquiryNotes'])->name('agency.inquiry.add.notes');
 
 // Module 4: Notification System Routes
 
 // Public User Notification Routes
 Route::middleware(['auth'])->group(function () {
     // Public user notifications (receive only)
-    Route::get('/public/notifications', [NotificationController::class, 'publicNotifications'])->name('public.notifications');
-    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread.count');
-    Route::post('/notifications/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark.read');
+    Route::get('/public/notifications', [Module4NotificationController::class, 'publicNotifications'])->name('public.notifications');
+    Route::get('/notifications/unread-count', [Module4NotificationController::class, 'getUnreadCount'])->name('notifications.unread.count');
+    Route::post('/notifications/{id}/mark-read', [Module4NotificationController::class, 'markAsRead'])->name('notifications.mark.read');
 
     // Status history for inquiries
-    Route::get('/inquiry/{inquiryId}/status-history', [NotificationController::class, 'getStatusHistory'])->name('inquiry.status.history');
+    Route::get('/inquiry/{inquiryId}/status-history', [Module4NotificationController::class, 'getStatusHistory'])->name('inquiry.status.history');
 });
 
 // Admin Notification Routes
 Route::prefix('admin')->middleware('admin.auth')->group(function () {
     // Admin notifications dashboard
-    Route::get('/notifications', [NotificationController::class, 'adminNotifications'])->name('admin.notifications');
-    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('admin.notifications.unread.count');
-    Route::post('/notifications/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('admin.notifications.mark.read');
+    Route::get('/notifications', [Module4NotificationController::class, 'adminNotifications'])->name('admin.notifications');
+    Route::get('/notifications/unread-count', [Module4NotificationController::class, 'getUnreadCount'])->name('admin.notifications.unread.count');
+    Route::post('/notifications/{id}/mark-read', [Module4NotificationController::class, 'markAsRead'])->name('admin.notifications.mark.read');
+});
+
+// Agency Notification Routes
+Route::prefix('agency')->middleware(['auth'])->group(function () {
+    Route::get('/notifications', [Module4NotificationController::class, 'agencyNotifications'])->name('agency.notifications');
+    Route::get('/notifications/unread-count', [Module4NotificationController::class, 'getUnreadCount'])->name('agency.notifications.unread.count');
+    Route::post('/notifications/{id}/mark-read', [Module4NotificationController::class, 'markAsRead'])->name('agency.notifications.mark.read');
 });
 
 // Agency Communication Routes (API-style for AJAX calls)
 Route::prefix('agency')->middleware(['auth'])->group(function () {
     // Agency updates inquiry status and notifies public user
-    Route::post('/inquiry/update-status', [NotificationController::class, 'sendStatusUpdateToPublic'])->name('agency.inquiry.notify.status');
+    Route::post('/inquiry/update-status', [Module4NotificationController::class, 'sendStatusUpdateToPublic'])->name('agency.inquiry.notify.status');
 
     // Agency notifies admin of inquiry completion
-    Route::post('/inquiry/notify-completed', [NotificationController::class, 'notifyInquiryCompleted'])->name('agency.inquiry.notify.completed');
+    Route::post('/inquiry/notify-completed', [Module4NotificationController::class, 'notifyInquiryCompleted'])->name('agency.inquiry.notify.completed');
 
     // Agency requests reassignment
-    Route::post('/inquiry/request-reassignment', [NotificationController::class, 'requestReassignment'])->name('agency.inquiry.notify.reassignment');
+    Route::post('/inquiry/request-reassignment', [Module4NotificationController::class, 'requestReassignment'])->name('agency.inquiry.notify.reassignment');
 
     // Agency requests clarification from admin
-    Route::post('/inquiry/request-clarification', [NotificationController::class, 'requestClarification'])->name('agency.inquiry.request.clarification');
+    Route::post('/inquiry/request-clarification', [Module4NotificationController::class, 'requestClarification'])->name('agency.inquiry.request.clarification');
 });
 
 // Additional API Routes for real-time features
 Route::prefix('api')->middleware(['auth'])->group(function () {
     // Get status history for an inquiry
-    Route::get('/inquiry/{inquiryId}/status-history', [NotificationController::class, 'getStatusHistory'])->name('api.inquiry.status.history');
+    Route::get('/inquiry/{inquiryId}/status-history', [Module4NotificationController::class, 'getStatusHistory'])->name('api.inquiry.status.history');
 
     // Get unread notification count for current user
-    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('api.notifications.unread.count');
+    Route::get('/notifications/unread-count', [Module4NotificationController::class, 'getUnreadCount'])->name('api.notifications.unread.count');
 });
 
 // Investigation Notes Routes

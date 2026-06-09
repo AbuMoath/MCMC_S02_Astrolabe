@@ -439,17 +439,7 @@
         <div class="search-container">
             <input type="text" placeholder="Search...">
         </div>
-        <div class="user-info-topbar">
-            <div class="user-name">{{ Auth::user()->UserName }}</div>
-            <div class="user-pic">
-                @if (Auth::user()->UserProfilePicture)
-                    <img src="{{ asset('storage/' . Auth::user()->UserProfilePicture) }}" alt="Profile Picture">
-                @else
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->UserName) }}&background=cccccc&color=555555"
-                        alt="Profile Picture">
-                @endif
-            </div>
-        </div>
+        @include('partials.user_area')
     </header>
 
     <!-- Sidebar -->

@@ -481,14 +481,7 @@
 <body> <!-- Top Bar -->
     <header class="top-bar">
         <div class="logo">AuthenticityHub</div>
-        <div class="user-info-topbar">
-            <div class="welcome">
-                Welcome<br>{{ $admin->AdminName ?? 'Administrator' }}
-            </div>
-            <div class="user-icon">
-                <i class="fas fa-user-circle"></i>
-            </div>
-        </div>
+        @include('partials.user_area')
     </header> <!-- Sidebar -->
     <aside class="sidebar">
         <nav class="sidebar-nav">
@@ -625,11 +618,30 @@
                 @foreach ($recentActivities as $activity)
                     <div class="activity-item">
                         <div class="activity-icon">
-                            <i class="fas {{ $activity['icon'] }}"></i>
+                            <i class="fas
+                                @if($activity->InquiryStatus === 'Pending') fa-clock
+                                @elseif($activity->InquiryStatus === 'Under Investigation') fa-search
+                                @elseif($activity->InquiryStatus === 'Verified as True') fa-check-circle
+                                @elseif($activity->InquiryStatus === 'Identified as Fake') fa-times-circle
+                                @elseif($activity->InquiryStatus === 'Rejected') fa-ban
+                                @else fa-info-circle
+                                @endif
+                            "></i>
                         </div>
                         <div class="activity-content">
-                            <div class="activity-title">{{ $activity['title'] }}</div>
-                            <div class="activity-time">{{ $activity['time'] }}</div>
+                            <div class="activity-title">
+                                @if($activity->AgencyID && $activity->InquiryStatus !== 'Pending')
+                                    Inquiry "{{ Str::limit($activity->InquiryTitle, 30) }}" — Status: {{ $activity->InquiryStatus }}
+                                    @if($activity->agency)
+                                        ({{ $activity->agency->AgencyName }})
+                                    @endif
+                                @elseif($activity->AgencyID)
+                                    Inquiry "{{ Str::limit($activity->InquiryTitle, 30) }}" assigned to {{ $activity->agency->AgencyName ?? 'agency' }}
+                                @else
+                                    New inquiry submitted: "{{ Str::limit($activity->InquiryTitle, 30) }}"
+                                @endif
+                            </div>
+                            <div class="activity-time">{{ $activity->updated_at ? $activity->updated_at->diffForHumans() : $activity->created_at->diffForHumans() }}</div>
                         </div>
                     </div>
                 @endforeach
@@ -639,35 +651,8 @@
                         <i class="fas fa-info-circle"></i>
                     </div>
                     <div class="activity-content">
-                        <div class="activity-title">New inquiry submitted</div>
-                        <div class="activity-time">2 hours ago</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">New agency registered</div>
-                        <div class="activity-time">1 day ago</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">New user registered</div>
-                        <div class="activity-time">2 days ago</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Inquiry verified as true</div>
-                        <div class="activity-time">3 days ago</div>
+                        <div class="activity-title">No recent activity</div>
+                        <div class="activity-time">System is quiet</div>
                     </div>
                 </div>
             @endif
@@ -735,71 +720,4 @@
 </body>
 
 </html>
-break;
-case '2':
-e.preventDefault();
-location.href = '{{ route('admin.inquiries') }}';
-break;
-case '3':
-e.preventDefault();
-location.href = '{{ route('admin.users') }}';
-break;
-case '4':
-e.preventDefault();
-location.href = '{{ route('admin.reports') }}';
-break;
-}
-}
-});
-});
-</script>
-</body>
 
-</html>
-e.preventDefault();
-location.href = '{{ route('admin.assign.inquiry') }}';
-break;
-case '2':
-e.preventDefault();
-location.href = '{{ route('admin.inquiries') }}';
-break;
-case '3':
-e.preventDefault();
-location.href = '{{ route('admin.users') }}';
-break;
-case '4':
-e.preventDefault();
-location.href = '{{ route('admin.reports') }}';
-break;
-}
-}
-});
-});
-</script>
-</body>
-
-</html>
-':
-' ' ' e.preventDefault();
-location.href = '{{ route('admin.assign.inquiry') }}';
-break;
-case '2':
-e.preventDefault();
-location.href = '{{ route('admin.inquiries') }}';
-break;
-case '3':
-e.preventDefault();
-location.href = '{{ route('admin.users') }}';
-break;
-case '4':
-e.preventDefault();
-location.href = '{{ route('admin.reports') }}';
-break;
-}
-}
-});
-});
-</script>
-</body>
-
-</html>

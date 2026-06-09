@@ -29,18 +29,18 @@ class AdminController extends BaseController
     public function showHome()
     {
         // Get admin data using Module1 model - session is guaranteed by middleware
-        $admin = Module1Administrator::find(session('admin_id'));
+        $admin = Module1Administrator::query()->find(session('admin_id'));
 
         // Get dashboard statistics using Module1 models
         $stats = [
-            'total_inquiries' => \App\Models\Inquiry::count(),
-            'pending_inquiries' => \App\Models\Inquiry::whereNull('AgencyID')->count(), // Inquiries not yet assigned to an agency
+            'total_inquiries' => \App\Models\Inquiry::query()->count(),
+            'pending_inquiries' => \App\Models\Inquiry::query()->whereNull('AgencyID')->count(), // Inquiries not yet assigned to an agency
             'total_agencies' => Module1Agency::count(),
             'total_users' => Module1PublicUsers::count(),
         ];
 
         // Get recent inquiries for activity feed
-        $recentActivities = \App\Models\Inquiry::with('agency')
+        $recentActivities = \App\Models\Inquiry::query()->with('agency')
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
@@ -194,7 +194,7 @@ class AdminController extends BaseController
      */
     public function showInquiries(Request $request)
     {
-        $query = \App\Models\Inquiry::with(['reassignmentRequests' => function($q) {
+        $query = \App\Models\Inquiry::query()->with(['reassignmentRequests' => function($q) {
             $q->where('RequestStatus', 'Pending');
         }]);
 
@@ -288,7 +288,7 @@ class AdminController extends BaseController
         ]);
 
         foreach ($request->inquiry_ids as $inquiryId) {
-            $inquiry = \App\Models\Inquiry::find($inquiryId);
+            $inquiry = \App\Models\Inquiry::query()->find($inquiryId);
             if ($inquiry) {
                 $inquiry->AgencyID = $request->agency_id;
                 if ($request->notes) {
@@ -373,9 +373,11 @@ class AdminController extends BaseController
         $publicUsersQuery = Module1PublicUsers::query();
         $agenciesQuery = Module1Agency::query();
 
-        // Apply date filters
-        $publicUsersQuery->whereBetween('created_at', [$request->date_from, $request->date_to]);
-        $agenciesQuery->whereBetween('created_at', [$request->date_from, $request->date_to]);
+        // Apply date filters - handle NULL dates properly
+        if ($request->date_from && $request->date_to) {
+            $publicUsersQuery->whereBetween('created_at', [$request->date_from, $request->date_to]);
+            $agenciesQuery->whereBetween('created_at', [$request->date_from, $request->date_to]);
+        }
 
         // Apply user type filter
         if ($request->user_type === 'public') {
@@ -405,7 +407,8 @@ class AdminController extends BaseController
         ];
 
         // Generate report based on format
-        if ($request->format === 'pdf') {
+        $format = $request->input('format');
+        if ($format === 'pdf') {
             return $this->generatePDFReport($reportData);
         } else {
             return $this->generateExcelReport($reportData);
@@ -417,6 +420,7 @@ class AdminController extends BaseController
      */
     private function generateInquiryReports(Request $request)
     {
+        $format = $request->input('format');
         // Build the query based on filters
         $inquiriesQuery = Inquiry::query();
 
@@ -510,8 +514,8 @@ class AdminController extends BaseController
         ];
 
         // Generate report based on format
-        if ($request->format === 'pdf') {
-            return $this->generatePDFReport($reportData);
+        if ($format === 'pdf') {
+            return $this->generateInquiryPDFReport($reportData);
         } else {
             return $this->generateInquiryExcelReport($reportData);
         }
@@ -956,8 +960,9 @@ class AdminController extends BaseController
      */
     private function generateAssignmentReports(Request $request)
     {
+        $format = $request->input('format');
         // Build the query for assigned inquiries
-        $assignedInquiriesQuery = Inquiry::whereNotNull('AgencyID');
+        $assignedInquiriesQuery = Inquiry::query()->whereNotNull('AgencyID');
 
         // Apply assignment date filters
         if ($request->date_from && $request->date_to) {
@@ -1029,11 +1034,11 @@ class AdminController extends BaseController
             'assignment_trends' => $assignmentTrends,
 
             // Raw data for detailed reports
-            'assignments' => $assignedInquiries,
+            'assigned_inquiries' => $assignedInquiries,
         ];
 
         // Generate the report based on format
-        if ($request->format === 'pdf') {
+        if ($format === 'pdf') {
             return $this->generatePDFReport($data);
         } else {
             return $this->generateAssignmentExcel($data);
@@ -1317,6 +1322,7 @@ class AdminController extends BaseController
     private function generateAgencyPerformanceReports(Request $request)
     {
         try {
+            $format = $request->input('format');
             // Get the date range for filtering
             $dateFrom = $request->date_from;
             $dateTo = $request->date_to;
@@ -1334,7 +1340,7 @@ class AdminController extends BaseController
             
             foreach ($agencies as $agency) {
                 // Build inquiry query for this agency
-                $inquiryQuery = \App\Models\Inquiry::where('AgencyID', $agency->AgencyID);
+                $inquiryQuery = \App\Models\Inquiry::query()->where('AgencyID', $agency->AgencyID);
                 
                 // Apply date filters if provided
                 if ($dateFrom && $dateTo) {
@@ -1412,7 +1418,7 @@ class AdminController extends BaseController
             ];
             
             // Generate the report based on format
-            if ($request->format === 'pdf') {
+            if ($format === 'pdf') {
                 return $this->generatePDFReport($data);
             } else {
                 return $this->generateAgencyPerformanceExcel($reportData, $request);

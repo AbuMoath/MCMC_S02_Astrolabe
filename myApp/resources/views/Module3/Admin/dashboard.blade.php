@@ -481,14 +481,7 @@
 <body> <!-- Top Bar -->
     <header class="top-bar">
         <div class="logo">AuthenticityHub</div>
-        <div class="user-info-topbar">
-            <div class="welcome">
-                Welcome<br>{{ $admin->AdminName ?? 'Administrator' }}
-            </div>
-            <div class="user-icon">
-                <i class="fas fa-user-circle"></i>
-            </div>
-        </div>
+        @include('partials.user_area')
     </header> <!-- Sidebar -->
     <aside class="sidebar">
         <nav class="sidebar-nav">

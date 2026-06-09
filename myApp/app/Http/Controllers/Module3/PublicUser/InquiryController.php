@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request as RequestFacade;
 use Illuminate\Validation\ValidationException;
 use App\Models\Module3\Inquiry;
+use App\Services\InquiryNotificationService;
 
 class InquiryController extends Controller
 {
@@ -76,7 +77,7 @@ class InquiryController extends Controller
         }
 
         try {
-            Inquiry::create([
+            $inquiry = Inquiry::create([
                 'InquiryTitle' => $request->InquiryTitle,
                 'InquirySource' => $request->InquirySource,
                 'InquiryDescription' => $request->InquiryDescription,
@@ -86,6 +87,11 @@ class InquiryController extends Controller
                 'InquirySendDate' => now(),
                 'UserID' => Auth::id() ?? null,
             ]);
+
+            InquiryNotificationService::notifyAdminsOfNewInquiry(
+                $inquiry,
+                Auth::user()->UserName
+            );
 
             Log::info('Inquiry created successfully');
             // Redirect to inquiries list with success message
@@ -150,7 +156,7 @@ class InquiryController extends Controller
                 ->get();
         }
 
-        return view('publicUser.inquiries', compact('userInquiries', 'otherInquiries'));
+        return view('Module3.PublicUser.inquiries', compact('userInquiries', 'otherInquiries'));
     }
 
     /**
@@ -168,13 +174,9 @@ class InquiryController extends Controller
             Session::put('previous_url', URL::previous());
         }
 
-        // Allow users to view their own inquiries or public inquiries
+        // Allow users to view any inquiry (their own or other public inquiries)
         // Include agency relationship for assignment information
-        $inquiry = Inquiry::with('agency')
-            ->where(function ($query) {
-                $query->where('UserID', Auth::id())
-                    ->orWhereNull('UserID');
-            })->findOrFail($id);
+        $inquiry = Inquiry::with('agency')->findOrFail($id);
 
         return view('Module3.PublicUser.inquiryDetails', compact('inquiry'));
     }
@@ -339,15 +341,26 @@ class InquiryController extends Controller
     public function destroy($id)
     {
         $inquiry = Inquiry::findOrFail($id);
-        
-        // Check if user owns this inquiry
-        if (session('user_id') && $inquiry->UserID !== session('user_id')) {
-            abort(403, 'Unauthorized to delete this inquiry.');
-        }
 
         $inquiry->delete();
         
         return redirect()->route('inquiries.index')->with('success', 'Inquiry deleted successfully!');
+    }
+
+    /**
+     * Delete all user inquiries
+     */
+    public function destroyAll()
+    {
+        $userId = Auth::id();
+        
+        if (!$userId) {
+            abort(403, 'Unauthorized');
+        }
+
+        Inquiry::where('UserID', $userId)->delete();
+        
+        return redirect()->route('inquiries.index')->with('success', 'All your inquiries have been deleted successfully!');
     }
 
     /**

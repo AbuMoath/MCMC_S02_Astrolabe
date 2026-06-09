@@ -278,7 +278,7 @@ class AgencyController extends Controller
 
         // Update inquiry status
         $inquiry->InquiryStatus = 'Under Investigation';
-        $inquiry->AgencyComments = $request->comments;
+        $inquiry->StatusComments = $request->comments;
         $inquiry->save();
 
         return response()->json([

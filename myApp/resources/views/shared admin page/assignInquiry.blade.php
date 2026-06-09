@@ -554,14 +554,7 @@
         <div class="search-container">
             <input type="text" placeholder="Search...">
         </div>
-        <div class="user-info-topbar">
-            <div class="welcome">
-                Welcome<br>{{ DB::table('administrators')->first()->AdminName ?? 'Admin' }}
-            </div>
-            <div class="user-icon">
-                <i class="fas fa-user-circle"></i>
-            </div>
-        </div>
+        @include('partials.user_area')
     </header>
 
     <!-- Sidebar -->

@@ -296,27 +296,7 @@
         <div class="logo">AuthenticityHub</div>
         <div class="search-container">
             <input type="text" placeholder="Search...">
-        </div>        <div class="user-info-topbar">
-            <div class="user-pic">
-                @auth
-                    @if (Auth::user()->UserProfilePicture)
-                        <img src="{{ asset('storage/' . Auth::user()->UserProfilePicture) }}" alt="Profile Picture">
-                    @else
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->UserName) }}&background=cccccc&color=555555"
-                            alt="Profile Picture">
-                    @endif
-                @else
-                    <img src="https://ui-avatars.com/api/?name=Guest&background=cccccc&color=555555" alt="Guest Profile">
-                @endauth
-            </div>
-            <div class="user-name">
-                @auth
-                    {{ Auth::user()->UserName }}
-                @else
-                    Guest User
-                @endauth
-            </div>
-        </div>
+        </div>        @include('partials.user_area')
     </header>
 
     <!-- Sidebar -->
@@ -370,57 +350,47 @@
 
             @if(isset($notifications) && $notifications->count() > 0)
                 @foreach($notifications as $notification)
-                    <div class="notification-item">
-                        @if($notification['type'] == 'inquiry_update')
+                    <div class="notification-item {{ !$notification->is_read ? 'unread' : '' }}">
+                        @if($notification->type == 'status_update' || $notification->type == 'inquiry_update')
                             {{-- Inquiry Status Update --}}
                             <div class="notification-title">
                                 <i class="fas fa-info-circle" style="color: #3b82f6; margin-right: 0.5rem;"></i>
-                                {{ $notification['title'] }}
+                                {{ $notification->title }}
                             </div>
                             <div class="notification-status">
-                                Your inquiry "{{ $notification['inquiry']->InquiryTitle ?? 'Unknown Inquiry' }}" status:
-                                <span class="status-badge 
-                                    @if($notification['inquiry']->InquiryStatus == 'Pending') status-pending
-                                    @elseif($notification['inquiry']->InquiryStatus == 'Under Investigation') status-investigation
-                                    @elseif($notification['inquiry']->InquiryStatus == 'Verified as True') status-verified
-                                    @elseif($notification['inquiry']->InquiryStatus == 'Verified as False') status-false
-                                    @endif">
-                                    {{ $notification['inquiry']->InquiryStatus ?? 'Unknown Status' }}
-                                </span>
+                                {{ $notification->message }}
                             </div>
-                            @if($notification['inquiry']->VerificationDescription)
-                                <div style="color: #4b5563; margin-top: 0.5rem;">
-                                    <strong>Details:</strong> {{ $notification['inquiry']->VerificationDescription }}
-                                </div>
-                            @endif
                             <div class="notification-date">
-                                Updated: {{ $notification['date']->format('M j, Y \a\t g:i A') }}
+                                Updated: {{ $notification->created_at->format('M j, Y \a\t g:i A') }}
                             </div>
 
-                        @elseif($notification['type'] == 'agency_note')
+                        @elseif($notification->type == 'inquiry_assigned')
+                            {{-- Inquiry Assigned --}}
+                            <div class="notification-title">
+                                <i class="fas fa-building" style="color: #10b981; margin-right: 0.5rem;"></i>
+                                {{ $notification->title }}
+                            </div>
+                            <div class="notification-status">
+                                {{ $notification->message }}
+                            </div>
+                            <div class="notification-date">
+                                Assigned: {{ $notification->created_at->format('M j, Y \a\t g:i A') }}
+                            </div>
+
+                        @elseif($notification->type == 'agency_note')
                             {{-- Agency Note --}}
                             <div class="notification-title">
                                 <i class="fas fa-sticky-note" style="color: #f59e0b; margin-right: 0.5rem;"></i>
-                                {{ $notification['title'] }}
+                                {{ $notification->title }}
                             </div>
                             <div style="color: #4b5563; margin-top: 0.5rem;">
-                                <strong>Regarding:</strong> {{ $notification['inquiry']->InquiryTitle ?? 'Inquiry #' . $notification['inquiry_id'] }}
+                                <strong>Regarding:</strong> {{ $notification->inquiry->InquiryTitle ?? 'Inquiry #' . $notification->inquiry_id }}
                             </div>
                             <div style="color: #374151; margin-top: 0.75rem; background: #f9fafb; padding: 1rem; border-radius: 0.5rem; border-left: 4px solid #f59e0b;">
-                                {{ $notification['message'] }}
+                                {{ $notification->message }}
                             </div>
-                            @if($notification['supporting_document'])
-                                <div style="margin-top: 0.75rem;">
-                                    <a href="{{ asset('storage/' . $notification['supporting_document']) }}" 
-                                       target="_blank" 
-                                       style="display: inline-flex; align-items: center; gap: 0.5rem; color: #3b82f6; text-decoration: none; font-size: 0.875rem;">
-                                        <i class="fas fa-paperclip"></i>
-                                        View Supporting Document
-                                    </a>
-                                </div>
-                            @endif
                             <div class="notification-date">
-                                Sent: {{ $notification['date']->format('M j, Y \a\t g:i A') }}
+                                Sent: {{ $notification->created_at->format('M j, Y \a\t g:i A') }}
                             </div>
                         @endif
                     </div>

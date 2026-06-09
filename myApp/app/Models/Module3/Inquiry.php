@@ -36,10 +36,12 @@ class Inquiry extends Model
         'UserID',
         'AgencyID',
         'AdminID',
-        'AdminNotes',
-        'AgencyComments',
+        'admin_comments',
         'RejectionReason',
         'assignment_date',
+        'expected_completion_date',
+        'priority_level',
+        'StatusComments',
     ];
 
     /**
@@ -158,7 +160,7 @@ class Inquiry extends Model
             'Under Investigation' => 'info',
             'Verified as True' => 'success',
             'Identified as Fake' => 'danger',
-            'Rejected' => 'secondary',
+            'Rejected' => 'danger',
             'Completed' => 'primary',
         ];
 
@@ -232,7 +234,7 @@ class Inquiry extends Model
         $this->update([
             'AgencyID' => $agencyId,
             'AdminID' => $adminId,
-            'AdminNotes' => $notes,
+            'admin_comments' => $notes,
             'assignment_date' => now(),
         ]);
 
@@ -272,7 +274,7 @@ class Inquiry extends Model
         $data = ['InquiryStatus' => 'Under Investigation'];
         
         if ($comments) {
-            $data['AgencyComments'] = $comments;
+            $data['StatusComments'] = $comments;
         }
 
         return $this->update($data);

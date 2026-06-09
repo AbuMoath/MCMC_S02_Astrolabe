@@ -411,12 +411,7 @@ Module 4: Admin - Notification List Page
         <div class="search-container">
             <input type="text" placeholder="Search...">
         </div>
-        <div class="user-info-topbar">
-            <div class="user-name">Admin</div>
-            <div class="user-pic">
-                <i class="fas fa-user-shield" style="color: #ffffff; font-size: 1.5rem; padding: 0.5rem;"></i>
-            </div>
-        </div>
+        @include('partials.user_area')
     </header>    <!-- Sidebar -->
     <aside class="sidebar">
         <nav class="sidebar-nav">
@@ -463,12 +458,12 @@ Module 4: Admin - Notification List Page
                 </div>
             @else
                 @foreach($notifications as $notification)
-                    <div class="notification-item {{ ($notification['read'] ?? false) ? 'read' : 'unread' }}" id="notification-{{ $notification['id'] }}">
+                    <div class="notification-item {{ ($notification->is_read ?? false) ? 'read' : 'unread' }}" id="notification-{{ $notification->id }}">
                         <div class="notification-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
                             <div>
                                 <div class="notification-title">
-                                    {{ $notification['title'] }}
-                                    @if(!($notification['read'] ?? false))
+                                    {{ $notification->title }}
+                                    @if(!($notification->is_read ?? false))
                                         <span class="unread-indicator"></span>
                                     @endif
                                 </div>
@@ -476,17 +471,17 @@ Module 4: Admin - Notification List Page
                         </div>
 
                         <div class="notification-meta">
-                            @if(isset($notification['type']) && $notification['type'] == 'agency_note')
+                            @if(isset($notification->type) && $notification->type == 'agency_note')
                                 {{-- Agency Note --}}
-                                <span><strong>Inquiry:</strong> #{{ $notification['inquiry_id'] }}</span>
-                                <span><strong>Agency:</strong> {{ $notification['officer_name'] }}</span>
-                                <span><strong>Time:</strong> {{ $notification['timestamp'] }}</span>
+                                <span><strong>Inquiry:</strong> #{{ $notification->inquiry_id }}</span>
+                                <span><strong>Agency:</strong> {{ ($notification->inquiry && $notification->inquiry->agency ? $notification->inquiry->agency->AgencyName : 'System') }}</span>
+                                <span><strong>Time:</strong> {{ ($notification->created_at ? $notification->created_at->format('M j, Y \a\t g:i A') : 'Unknown') }}</span>
                                 <span class="status-badge status-agency-note">Agency Note</span>
                             @else
                                 {{-- Legacy Notification --}}
-                                <span><strong>Inquiry:</strong> #{{ $notification['inquiry_id'] ?? 'N/A' }}</span>
-                                <span><strong>Officer:</strong> {{ $notification['officer_name'] ?? 'System' }}</span>
-                                <span><strong>Time:</strong> {{ $notification['timestamp'] ?? 'Unknown' }}</span>
+                                <span><strong>Inquiry:</strong> #{{ $notification->inquiry_id ?? 'N/A' }}</span>
+                                <span><strong>Officer:</strong> {{ ($notification->inquiry && $notification->inquiry->agency ? $notification->inquiry->agency->AgencyName : 'System') ?? 'System' }}</span>
+                                <span><strong>Time:</strong> {{ ($notification->created_at ? $notification->created_at->format('M j, Y \a\t g:i A') : 'Unknown') ?? 'Unknown' }}</span>
                                 @if(isset($notification['status_update']))
                                     <span class="status-badge status-{{ $notification['status_update'] }}">
                                         {{ ucfirst(str_replace('_', ' ', $notification['status_update'])) }}
@@ -496,10 +491,10 @@ Module 4: Admin - Notification List Page
                         </div>
                         
                         <div class="notification-message">
-                            @if(isset($notification['type']) && $notification['type'] == 'agency_note')
+                            @if(isset($notification->type) && $notification->type == 'agency_note')
                                 {{-- Agency Note Message --}}
                                 <div class="agency-note-content">
-                                    {{ $notification['message'] }}
+                                    {{ $notification->message }}
                                 </div>
                                 @if($notification['supporting_document'])
                                     <a href="{{ asset('storage/' . $notification['supporting_document']) }}" 
@@ -511,17 +506,17 @@ Module 4: Admin - Notification List Page
                                 @endif
                             @else
                                 {{-- Legacy Message --}}
-                                {{ $notification['message'] }}
+                                {{ $notification->message }}
                             @endif
                         </div>                        <div class="notification-actions">
-                            @if(!($notification['read'] ?? false))
-                                <button onclick="markAsRead('{{ $notification['id'] }}')" class="btn btn-success">
+                            @if(!($notification->is_read ?? false))
+                                <button onclick="markAsRead('{{ $notification->id }}')" class="btn btn-success">
                                     <i class="fas fa-check"></i>
                                     Mark as Read
                                 </button>
                             @endif
-                            @if(isset($notification['inquiry_id']))
-                                <a href="{{ route('admin.inquiry.details', $notification['inquiry_id']) }}" class="btn btn-primary">
+                            @if(isset($notification->inquiry_id))
+                                <a href="{{ route('admin.inquiry.details', $notification->inquiry_id) }}" class="btn btn-primary">
                                     <i class="fas fa-eye"></i>
                                     View Inquiry
                                 </a>
@@ -537,7 +532,7 @@ Module 4: Admin - Notification List Page
         </div>
     </main>    <script>
         function markAsRead(notificationId) {
-            fetch('/module4/admin/notifications/' + notificationId + '/read', {
+            fetch('/admin/notifications/' + notificationId + '/mark-read', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -570,7 +565,7 @@ Module 4: Admin - Notification List Page
         }
 
         function markAllAsRead() {
-            fetch('/module4/admin/notifications/mark-all-read', {
+            fetch('/admin/notifications/mark-all-read', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
