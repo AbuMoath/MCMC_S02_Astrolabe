@@ -21,12 +21,20 @@
     $notifications = collect();
     
     if ($userId && $userType) {
-        $notifications = \App\Models\Notification::where('user_id', $userId)
-            ->where('user_type', $userType)
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get();
-        $unreadCount = $notifications->where('is_read', false)->count();
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+                $notifications = \App\Models\Notification::where('user_id', $userId)
+                    ->where('user_type', $userType)
+                    ->orderBy('created_at', 'desc')
+                    ->limit(10)
+                    ->get();
+                $unreadCount = $notifications->where('is_read', false)->count();
+            }
+        } catch (\Exception $e) {
+            // If the database isn't migrated yet or table doesn't exist, skip notifications gracefully
+            $notifications = collect();
+            $unreadCount = 0;
+        }
     }
 @endphp
 
