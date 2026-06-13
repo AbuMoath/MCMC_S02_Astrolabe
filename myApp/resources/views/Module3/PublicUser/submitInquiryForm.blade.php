@@ -380,9 +380,9 @@
                                 <span id="file-label">Choose File</span>
                             </label>
                             <input id="documents" name="InquiryEvidence" type="file" class="hidden" required
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+                                accept=".pdf,.jpg,.jpeg,.png" />
                             <div class="text-sm text-gray-500 mt-2">
-                                Accepted formats: PDF, DOC, DOCX, JPG, PNG
+                                Accepted formats: PDF, JPG, PNG (Max 2MB)
                             </div>
                         </div>
                     </div>
@@ -407,10 +407,31 @@
             const fileInput = document.getElementById('documents');
             const fileLabel = document.getElementById('file-label');
 
-            // File upload handler
+            // File upload handler with type & size validation
             fileInput.addEventListener('change', function(e) {
                 if (fileInput.files.length > 0) {
-                    fileLabel.textContent = fileInput.files[0].name;
+                    const file = fileInput.files[0];
+                    const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+                    const maxSizeBytes = 2 * 1024 * 1024; // 2MB
+
+                    // Validate file extension
+                    const fileExtension = file.name.split('.').pop().toLowerCase();
+                    if (!allowedExtensions.includes(fileExtension)) {
+                        alert('Invalid file format. Please upload PDF, JPG, or PNG documents.');
+                        fileInput.value = '';
+                        fileLabel.textContent = 'Choose File';
+                        return;
+                    }
+
+                    // Validate file size
+                    if (file.size > maxSizeBytes) {
+                        alert('File is too large. Maximum size allowed is 2MB.');
+                        fileInput.value = '';
+                        fileLabel.textContent = 'Choose File';
+                        return;
+                    }
+
+                    fileLabel.textContent = file.name;
                 } else {
                     fileLabel.textContent = 'Choose File';
                 }
