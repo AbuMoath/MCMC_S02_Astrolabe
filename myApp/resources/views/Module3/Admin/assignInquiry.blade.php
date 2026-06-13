@@ -279,6 +279,58 @@
             border: 1px solid #bae6fd;
         }
 
+        .recommendation-panel {
+            margin-bottom: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+            border: 1px solid #bfdbfe;
+        }
+
+        .recommendation-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 0.35rem;
+        }
+
+        .recommendation-meta {
+            font-size: 0.875rem;
+            color: #475569;
+        }
+
+        .recommendation-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: 9999px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .agency-recommendation {
+            margin-top: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            padding: 0.35rem 0.55rem;
+            border-radius: 9999px;
+            background: #ecfeff;
+            color: #0f766e;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .agency-recommendation-empty {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
         .assignment-form {
             display: flex;
             gap: 1rem;
@@ -646,11 +698,21 @@
                     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
                         {{ session('error') }}
                     </div>
-                @endif                <!-- Assignment Section -->
+                @endif
+                <!-- Assignment Section -->
                 <div class="assignment-section">
                     <h3 class="text-lg font-semibold text-[#333] mb-4">
                         <i class="fas fa-hand-point-right mr-2"></i>Bulk Assignment with Comments
                     </h3>
+                    <div class="recommendation-panel" id="assignmentRecommendation">
+                        <div class="recommendation-title">Keyword-based agency recommendation</div>
+                        <div id="assignmentRecommendationName" class="recommendation-meta">
+                            Select one or more inquiries to auto-suggest the most suitable agency.
+                        </div>
+                        <div id="assignmentRecommendationDetails" class="recommendation-meta mt-1">
+                            Matching uses InquiryTitle and InquiryDescription only.
+                        </div>
+                    </div>
                     <form method="POST" action="{{ route('admin.assign.inquiries') }}" class="assignment-form" id="assignmentForm">
                         @csrf
                         <div class="flex flex-col gap-4 w-full">
@@ -659,7 +721,7 @@
                             </div>
                             
                             <div class="flex gap-4 items-start w-full">
-                                <select name="agency_id" required class="form-select flex-1">
+                                <select name="agency_id" id="agencySelect" required class="form-select flex-1">
                                     <option value="">Select Agency to Assign</option>
                                     @foreach($agencies as $agency)
                                         <option value="{{ $agency->AgencyID }}">{{ $agency->AgencyName }}</option>
@@ -751,7 +813,10 @@
                                         <td class="checkbox-cell">
                                             @if(!$inquiry->AgencyID)
                                                 <input type="checkbox" name="inquiry_ids[]" value="{{ $inquiry->InquiryID }}" 
-                                                       class="inquiry-checkbox" form="assignmentForm">
+                                                       class="inquiry-checkbox" form="assignmentForm"
+                                                       data-recommended-agency-id="{{ $inquiry->recommended_agency_id }}"
+                                                       data-recommended-agency-name="{{ $inquiry->recommended_agency_name }}"
+                                                       data-recommended-keywords="{{ implode('|', $inquiry->recommended_keywords ?? []) }}">
                                             @else
                                                 <i class="fas fa-check text-green-500" title="Already assigned"></i>
                                             @endif
@@ -768,6 +833,21 @@
                                             <div class="font-medium">{{ $inquiry->InquiryTitle }}</div>
                                             <div class="text-sm text-gray-500">
                                                 {{ Str::limit($inquiry->InquiryDescription, 50) }}</div>
+                                            @if($inquiry->recommended_agency_name)
+                                                <div class="agency-recommendation">
+                                                    <i class="fas fa-wand-magic-sparkles"></i>
+                                                    <span>Recommended: {{ $inquiry->recommended_agency_name }}</span>
+                                                    @if(!empty($inquiry->recommended_keywords))
+                                                        <span class="recommendation-chip">
+                                                            {{ implode(', ', $inquiry->recommended_keywords) }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <div class="agency-recommendation-empty">
+                                                    No keyword match found for this inquiry.
+                                                </div>
+                                            @endif
                                         </td>
                                         <td>{{ $inquiry->InquirySource }}</td>
                                         <td>
@@ -808,7 +888,8 @@
                                     </tr>
                                 @endforeach
                             @else
-                                <tr>
+                                                       class="inquiry-checkbox" form="assignmentForm"
+                                                       data-recommended-agency-id="{{ $inquiry->recommended_agency_id }}"
                                     <td colspan="8" class="text-center py-8 text-gray-500">
                                         No inquiries found matching your criteria.
                                     </td>
@@ -1050,6 +1131,15 @@
                     <h3 class="text-lg font-semibold text-[#333] mb-4">
                         <i class="fas fa-sticky-note mr-2"></i>Assign with Custom Notes & Instructions
                     </h3>
+                    <div class="recommendation-panel" id="notesRecommendation">
+                        <div class="recommendation-title">Keyword-based agency recommendation</div>
+                        <div id="notesRecommendationName" class="recommendation-meta">
+                            Select one or more inquiries to auto-suggest the most suitable agency.
+                        </div>
+                        <div id="notesRecommendationDetails" class="recommendation-meta mt-1">
+                            Matching uses InquiryTitle and InquiryDescription only.
+                        </div>
+                    </div>
                     <form method="POST" action="{{ route('admin.assign.inquiries.with.notes') }}" class="assignment-form" id="notesAssignmentForm">
                         @csrf
                         <div class="flex flex-col gap-4 w-full">
@@ -1058,7 +1148,7 @@
                             </div>
                             
                             <div class="flex gap-4 items-start w-full">
-                                <select name="agency_id" required class="form-select flex-1">
+                                <select name="agency_id" id="notesAgencySelect" required class="form-select flex-1">
                                     <option value="">Select Agency to Assign</option>
                                     @foreach($agencies as $agency)
                                         <option value="{{ $agency->AgencyID }}">{{ $agency->AgencyName }}</option>
@@ -1154,7 +1244,10 @@
                                         <td class="checkbox-cell">
                                             @if(!$inquiry->AgencyID)
                                                 <input type="checkbox" name="inquiry_ids[]" value="{{ $inquiry->InquiryID }}" 
-                                                       class="inquiry-checkbox-notes" form="notesAssignmentForm">
+                                                       class="inquiry-checkbox-notes" form="notesAssignmentForm"
+                                                       data-recommended-agency-id="{{ $inquiry->recommended_agency_id }}"
+                                                       data-recommended-agency-name="{{ $inquiry->recommended_agency_name }}"
+                                                       data-recommended-keywords="{{ implode('|', $inquiry->recommended_keywords ?? []) }}">
                                             @else
                                                 <i class="fas fa-check text-green-500" title="Already assigned"></i>
                                             @endif
@@ -1171,6 +1264,21 @@
                                             <div class="font-medium">{{ $inquiry->InquiryTitle }}</div>
                                             <div class="text-sm text-gray-500">
                                                 {{ Str::limit($inquiry->InquiryDescription, 50) }}</div>
+                                            @if($inquiry->recommended_agency_name)
+                                                <div class="agency-recommendation">
+                                                    <i class="fas fa-wand-magic-sparkles"></i>
+                                                    <span>Recommended: {{ $inquiry->recommended_agency_name }}</span>
+                                                    @if(!empty($inquiry->recommended_keywords))
+                                                        <span class="recommendation-chip">
+                                                            {{ implode(', ', $inquiry->recommended_keywords) }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <div class="agency-recommendation-empty">
+                                                    No keyword match found for this inquiry.
+                                                </div>
+                                            @endif
                                         </td>
                                         <td>{{ $inquiry->InquirySource }}</td>
                                         <td>
@@ -1229,7 +1337,8 @@
                                     </tr>
                                 @endforeach
                             @else
-                                <tr>
+                                                       class="inquiry-checkbox-notes" form="notesAssignmentForm"
+                                                       data-recommended-agency-id="{{ $inquiry->recommended_agency_id }}"
                                     <td colspan="9" class="text-center py-8 text-gray-500">
                                         No inquiries found matching your criteria.
                                     </td>
@@ -1272,78 +1381,131 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Regular assign page functionality
-            const selectAllCheckbox = document.getElementById('selectAll');
-            const inquiryCheckboxes = document.querySelectorAll('.inquiry-checkbox');
-            const selectedCount = document.getElementById('selectedCount');
-            const assignButton = document.getElementById('assignButton');
+            function updateRecommendationUI(selectedCheckboxes, recommendationNameId, recommendationDetailsId, agencySelectId) {
+                const recommendationName = document.getElementById(recommendationNameId);
+                const recommendationDetails = document.getElementById(recommendationDetailsId);
+                const agencySelect = document.getElementById(agencySelectId);
 
-            function updateSelectedCount() {
-                const selected = document.querySelectorAll('.inquiry-checkbox:checked').length;
-                if (selected > 0) {
-                    selectedCount.textContent = `${selected} inquiry${selected > 1 ? 'ies' : ''} selected`;
-                    selectedCount.style.display = 'block';
-                    assignButton.disabled = false;
-                } else {
-                    selectedCount.style.display = 'none';
-                    assignButton.disabled = true;
+                if (!recommendationName || !recommendationDetails) {
+                    return;
+                }
+
+                if (selectedCheckboxes.length === 0) {
+                    recommendationName.textContent = 'Select one or more inquiries to auto-suggest the most suitable agency.';
+                    recommendationDetails.textContent = 'Matching uses InquiryTitle and InquiryDescription only.';
+                    return;
+                }
+
+                const counts = new Map();
+                const metadata = new Map();
+
+                selectedCheckboxes.forEach(function(checkbox) {
+                    const agencyId = checkbox.dataset.recommendedAgencyId;
+                    const agencyName = checkbox.dataset.recommendedAgencyName;
+                    const keywords = (checkbox.dataset.recommendedKeywords || '')
+                        .split('|')
+                        .map(keyword => keyword.trim())
+                        .filter(Boolean);
+
+                    if (!agencyId || !agencyName) {
+                        return;
+                    }
+
+                    counts.set(agencyId, (counts.get(agencyId) || 0) + 1);
+                    metadata.set(agencyId, { agencyName, keywords });
+                });
+
+                if (counts.size === 0) {
+                    recommendationName.textContent = 'No keyword match found for the selected inquiries.';
+                    recommendationDetails.textContent = 'You can still manually choose any agency from the dropdown.';
+                    return;
+                }
+
+                const [recommendedAgencyId] = Array.from(counts.entries())
+                    .sort(function(previous, next) {
+                        return next[1] - previous[1];
+                    })[0];
+
+                const recommendation = metadata.get(recommendedAgencyId);
+                const keywordText = recommendation.keywords.length > 0
+                    ? `Matched keywords: ${recommendation.keywords.join(', ')}`
+                    : 'Matched keywords: none';
+
+                recommendationName.textContent = `Recommended agency: ${recommendation.agencyName}`;
+                recommendationDetails.textContent = keywordText;
+
+                if (agencySelect) {
+                    agencySelect.value = recommendedAgencyId;
                 }
             }
 
-            if (selectAllCheckbox) {
-                selectAllCheckbox.addEventListener('change', function() {
-                    inquiryCheckboxes.forEach(checkbox => {
-                        checkbox.checked = this.checked;
+            function setupAssignmentControls(config) {
+                const selectAllCheckbox = document.getElementById(config.selectAllId);
+                const checkboxes = document.querySelectorAll(config.checkboxSelector);
+                const selectedCount = document.getElementById(config.selectedCountId);
+                const submitButton = document.getElementById(config.buttonId);
+
+                function updateSelectedCount() {
+                    const selectedCheckboxes = Array.from(checkboxes).filter(function(checkbox) {
+                        return checkbox.checked;
                     });
-                    updateSelectedCount();
+
+                    if (selectedCheckboxes.length > 0) {
+                        selectedCount.textContent = `${selectedCheckboxes.length} inquir${selectedCheckboxes.length === 1 ? 'y' : 'ies'} selected`;
+                        selectedCount.style.display = 'block';
+                        submitButton.disabled = false;
+                    } else {
+                        selectedCount.style.display = 'none';
+                        submitButton.disabled = true;
+                    }
+
+                    updateRecommendationUI(selectedCheckboxes, config.recommendationNameId, config.recommendationDetailsId, config.agencySelectId);
+                }
+
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.addEventListener('change', function() {
+                        checkboxes.forEach(function(checkbox) {
+                            checkbox.checked = this.checked;
+                        }, this);
+                        updateSelectedCount();
+                    });
+                }
+
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.addEventListener('change', function() {
+                        if (selectAllCheckbox) {
+                            const allChecked = Array.from(checkboxes).every(function(item) {
+                                return item.checked;
+                            });
+
+                            selectAllCheckbox.checked = allChecked;
+                        }
+
+                        updateSelectedCount();
+                    });
                 });
+
+                updateSelectedCount();
             }
 
-            inquiryCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    if (selectAllCheckbox) {
-                        const allChecked = Array.from(inquiryCheckboxes).every(cb => cb.checked);
-                        selectAllCheckbox.checked = allChecked;
-                    }
-                    updateSelectedCount();
-                });
+            setupAssignmentControls({
+                selectAllId: 'selectAll',
+                checkboxSelector: '.inquiry-checkbox',
+                selectedCountId: 'selectedCount',
+                buttonId: 'assignButton',
+                recommendationNameId: 'assignmentRecommendationName',
+                recommendationDetailsId: 'assignmentRecommendationDetails',
+                agencySelectId: 'agencySelect',
             });
 
-            // Notes page functionality
-            const selectAllNotesCheckbox = document.getElementById('selectAllNotes');
-            const inquiryNotesCheckboxes = document.querySelectorAll('.inquiry-checkbox-notes');
-            const selectedCountNotes = document.getElementById('selectedCountNotes');
-            const notesAssignButton = document.getElementById('notesAssignButton');
-
-            function updateSelectedCountNotes() {
-                const selected = document.querySelectorAll('.inquiry-checkbox-notes:checked').length;
-                if (selected > 0) {
-                    selectedCountNotes.textContent = `${selected} inquiry${selected > 1 ? 'ies' : ''} selected`;
-                    selectedCountNotes.style.display = 'block';
-                    notesAssignButton.disabled = false;
-                } else {
-                    selectedCountNotes.style.display = 'none';
-                    notesAssignButton.disabled = true;
-                }
-            }
-
-            if (selectAllNotesCheckbox) {
-                selectAllNotesCheckbox.addEventListener('change', function() {
-                    inquiryNotesCheckboxes.forEach(checkbox => {
-                        checkbox.checked = this.checked;
-                    });
-                    updateSelectedCountNotes();
-                });
-            }
-
-            inquiryNotesCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    if (selectAllNotesCheckbox) {
-                        const allChecked = Array.from(inquiryNotesCheckboxes).every(cb => cb.checked);
-                        selectAllNotesCheckbox.checked = allChecked;
-                    }
-                    updateSelectedCountNotes();
-                });
+            setupAssignmentControls({
+                selectAllId: 'selectAllNotes',
+                checkboxSelector: '.inquiry-checkbox-notes',
+                selectedCountId: 'selectedCountNotes',
+                buttonId: 'notesAssignButton',
+                recommendationNameId: 'notesRecommendationName',
+                recommendationDetailsId: 'notesRecommendationDetails',
+                agencySelectId: 'notesAgencySelect',
             });
         });
     </script>

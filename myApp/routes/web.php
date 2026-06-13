@@ -289,3 +289,50 @@ Route::middleware(['auth'])->group(function () {
     // Common routes for file downloads
     Route::get('/investigation-attachment/{attachmentId}/download', [App\Http\Controllers\InvestigationNoteController::class, 'downloadAttachment'])->name('investigation.attachment.download');
 });
+
+// Dev helper: create test public user via browser (local only)
+Route::get('/dev/create-test-user', function () {
+    if (request()->ip() !== '127.0.0.1' && request()->ip() !== '::1') {
+        abort(403);
+    }
+
+    $user = \App\Models\PublicUser::updateOrCreate(
+        ['UserEmail' => 'publicuser@gmail.com'],
+        [
+            'UserName' => 'public',
+            'UserPassword' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'UserPhoneNum' => '1234567890',
+        ]
+    );
+
+    return response()->json([
+        'status' => 'ok',
+        'user_id' => $user->UserID ?? null,
+        'email' => $user->UserEmail ?? 'publicuser@gmail.com',
+    ]);
+});
+
+// Dev helper: create/sign in as admin via browser (local only)
+Route::get('/dev/login-admin', function () {
+    if (request()->ip() !== '127.0.0.1' && request()->ip() !== '::1') {
+        abort(403);
+    }
+
+    $admin = \App\Models\Module1\Administrator::updateOrCreate(
+        ['AdminEmail' => 'moahmmed@gmail.com'],
+        [
+            'AdminName' => 'Mohammed Admin',
+            'AdminUserName' => 'mohammed@admin',
+            'AdminPassword' => \Illuminate\Support\Facades\Hash::make('12345678'),
+            'AdminRole' => 'Super Administrator',
+            'AdminPhoneNum' => '',
+            'AdminAddress' => '',
+            'AdminProfilePicture' => null,
+        ]
+    );
+
+    session()->forget(['user_id', 'agency_id', 'otp_admin_id', 'admin_email']);
+    session(['admin_id' => $admin->AdminID, 'admin_name' => $admin->AdminName]);
+
+    return redirect()->route('admin.home');
+});

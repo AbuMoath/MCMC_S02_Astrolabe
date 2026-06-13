@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\AgencyRecommendationService;
 use App\Services\InquiryNotificationService;
 
 class AdminController extends Controller
@@ -471,6 +472,21 @@ class AdminController extends Controller
     {
         $inquiries = Inquiry::with(['agency', 'user'])->get();
         $agencies = Agency::all();
+
+        $inquiries->each(function (Inquiry $inquiry) use ($agencies) {
+            $recommendation = AgencyRecommendationService::recommend(
+                (string) $inquiry->InquiryTitle,
+                $inquiry->InquiryDescription,
+                $agencies
+            );
+
+            $inquiry->recommended_agency_id = $recommendation['agency_id'];
+            $inquiry->recommended_agency_name = $recommendation['agency_name'];
+            $inquiry->recommended_agency_category = $recommendation['category'];
+            $inquiry->recommended_keywords = $recommendation['matched_keywords'];
+            $inquiry->recommended_reason = $recommendation['reason'];
+        });
+
         return view('Module3.Admin.assignInquiry', compact('inquiries', 'agencies'));
     }    /**
      * Assign inquiries to agencies
